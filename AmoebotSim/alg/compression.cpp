@@ -20,12 +20,12 @@ CompressionParticle::CompressionParticle(const Node head,
     q(0),
     numNbrsBefore(0),
     flag(false) {
-    _state = getRandColor();
+    _state = getRandColor(); //MichaelM added getRandColor function so compression particles have color
 }
 
 void CompressionParticle::activate() {
 
-    if (_state != State::Blue) {
+    if (_state != State::Blue) { //MichaelM added if statement so that only red particles follow compression alg
 
   if (isContracted()) {
     int expandDir = randDir();  // Select a random neighboring location.
@@ -80,8 +80,8 @@ void CompressionParticle::activate() {
       /* case State::Green:  return 0x00ff00;
        case State::Blue:   return 0x0000ff;
        case State::Indigo: return 0x4b0082;
-       case State::Violet: return 0xbb00ff;
-       */
+       case State::Violet: return 0xbb00ff; //MichaelM removed extra colors, added Red2 so Red occurs twice as often
+       */                                   //and so red clusters more consistently
      }
 
      return -1;
@@ -151,7 +151,7 @@ bool CompressionParticle::checkProp1(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
-if (_state != State::Blue) {
+if (_state != State::Blue) { //MichaelM addes so only Red particles follow compression algorithm
   if (S.size() == 0) {
     return false;  // S has to be nonempty for Property 1.
   } else {
@@ -200,8 +200,9 @@ bool CompressionParticle::checkProp2(std::vector<int> S) const {
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
  if (_state != State::Blue) {   //MichaelM added this if statement so that only red particles follow the compression algorithms
-  if (S.size() == 0) {          //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster
-    return true;  // S has to be empty for Property 2. MichaelM changed "return false" to "return true"
+  if (S.size() == 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster
+                           // S has to be empty for Property 2.
+    return true;  //MichaelM changed "return false" to "return true"
   } else {
     const int numHeadNbrs = nbrCount(headLabels());
     const int numTailNbrs = nbrCount(tailLabels());
@@ -331,8 +332,9 @@ CompressionSystem::CompressionSystem(int numParticles, double lambda) {
       insert(new CompressionParticle(Node(i, 0), -1, randDir(), *this, lambda));
     }
   }
-*/ //MichaelM commented this out because we dont want particels to initialize in a line or a hexagon, we want
+*/ //MichaelM commented this out because we dont want particles to initialize in a line or a hexagon, we want
    //random dispersion within a hexagon.
+
   // Set up metrics.
   _measures.push_back(new PerimeterMeasure("Perimeter", 1, *this));
 }
