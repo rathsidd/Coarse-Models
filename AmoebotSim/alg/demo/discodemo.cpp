@@ -83,8 +83,8 @@ QString DiscoDemoParticle::inspectionText() const {
 
 DiscoDemoParticle::State DiscoDemoParticle::getRandColor() const {
   // Randomly select an integer and return the corresponding state via casting.
-  return static_cast<State>(randInt(0, 7));
-}
+  return static_cast<State>(randInt(0, 2)); //MichaelM integers correspond to the existing colors
+}                                           //(only red and blue at the moment)
 
 DiscoDemoSystem::DiscoDemoSystem(unsigned int numParticles, int counterMax) {
   // In order to enclose an area that's roughly 3.7x the # of particles using a
