@@ -151,7 +151,9 @@ bool CompressionParticle::checkProp1(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
-if (_state != State::Blue) { //MichaelM addes so only Red particles follow compression algorithm
+if (_state != State::Blue && q < 0.1) { //MichaelM only Red particles follow compression algorithm,
+                                          //since q is randomly gen. between 0, 1 then prop1 rate of satisfaction is variable
+                                          //affecting rate of diffusivity
   if (S.size() == 0) {
     return false;  // S has to be nonempty for Property 1.
   } else {
@@ -199,7 +201,9 @@ bool CompressionParticle::checkProp2(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
- if (_state != State::Blue) {   //MichaelM added this if statement so that only red particles follow the compression algorithms
+ if (_state != State::Blue && q < 0.1) {   //MichaelM only Red particles follow compression algorithm,
+                                             //since q is randomly gen. between 0, 1 then prop2 rate of satisfaction is variable
+                                             //affecting rate of diffusivity
   if (S.size() == 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster
                            // S has to be empty for Property 2.
     return true;  //MichaelM changed "return false" to "return true"
@@ -278,7 +282,7 @@ CompressionSystem::CompressionSystem(int numParticles, double lambda) {
           insert(new CompressionParticle(node, -1, randDir(), *this, lambda));
           occupied.insert(node);
         }
-        }
+      }
 
   // Initialize particle system.
 /*  if (lambda <= 2.17) {  // In the proven range of expansion, make a hexagon.
