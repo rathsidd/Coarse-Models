@@ -118,11 +118,11 @@ DiscoDemoSystem::DiscoDemoSystem(unsigned int numParticles, int counterMax) {
       //MichaelM: experimental addition of inserting new particle as # activations increases,
       //but error codes result and particles clone themselves only at the very beginning
 
-    /* if (getCount("# Activations")._value % 10 == 0) {
-     * insert(new DiscoDemoParticle(node, -1, randDir(), *this, counterMax));
+     if (getCount("# Activations")._value % 10 == 0) {
+      insert(new DiscoDemoParticle(node, -1, randDir(), *this, counterMax));
       occupied.insert(node);
       }
-     */
+
     }
   }
 }
