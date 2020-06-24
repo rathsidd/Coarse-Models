@@ -38,7 +38,7 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   // Functions for activating a particle in the system. activate activates a
   // random particle in the system, while activateParticleAt activates the
   // particle occupying the specified node if such a particle exists.
-  void activate() final;
+  void activate() override; //MichaelM changed final to override
   void activateParticleAt(Node node) final;
 
   // Returns the number of particles in the system.
