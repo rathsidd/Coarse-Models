@@ -282,7 +282,24 @@ CompressionSystem::CompressionSystem(int numParticles, double lambda) {
           insert(new CompressionParticle(node, -1, randDir(), *this, lambda));
           occupied.insert(node);
         }
-      }
+
+
+   //       while (occupied.size() < 15) {
+
+   /*         if (getCount("# Activations")._value % 5 == 1) {
+                int x = randInt(-sideLen + 1, sideLen);
+                int y = randInt(1, 2 * sideLen);
+                Node node(x, y);
+
+                    if (0 < x + y && x + y < 2 * sideLen
+                        && occupied.find(node) == occupied.end()) {
+                      insert(new CompressionParticle(node, -1, randDir(), *this, lambda));
+                      occupied.insert(node);
+                    }
+
+               } */
+   //   }  ^^MichaelM experimental code. Doesnt work.
+
 
   // Initialize particle system.
 /*  if (lambda <= 2.17) {  // In the proven range of expansion, make a hexagon.
