@@ -151,7 +151,7 @@ bool CompressionParticle::checkProp1(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
-if (_state != State::Blue && q < 0.1) { //MichaelM only Red particles follow compression algorithm,
+if (_state != State::Blue && q < 0.9) { //MichaelM only Red particles follow compression algorithm,
                                           //since q is randomly gen. between 0, 1 then prop1 rate of satisfaction is variable
                                           //affecting rate of diffusivity
   if (S.size() == 0) {
@@ -201,7 +201,7 @@ bool CompressionParticle::checkProp2(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
- if (_state != State::Blue && q < 0.1) {   //MichaelM only Red particles follow compression algorithm,
+ if (_state != State::Blue && q < 0.9) {   //MichaelM only Red particles follow compression algorithm,
                                              //since q is randomly gen. between 0, 1 then prop2 rate of satisfaction is variable
                                              //affecting rate of diffusivity
   if (S.size() == 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster
@@ -282,9 +282,7 @@ CompressionSystem::CompressionSystem(int numParticles, double lambda) {
           insert(new CompressionParticle(node, -1, randDir(), *this, lambda));
           occupied.insert(node);
         }
-
-
-   //       while (occupied.size() < 15) {
+      }
 
    /*         if (getCount("# Activations")._value % 5 == 1) {
                 int x = randInt(-sideLen + 1, sideLen);
@@ -298,7 +296,7 @@ CompressionSystem::CompressionSystem(int numParticles, double lambda) {
                     }
 
                } */
-   //   }  ^^MichaelM experimental code. Doesnt work.
+   //   ^^MichaelM experimental code. Doesnt work.
 
 
   // Initialize particle system.
@@ -360,6 +358,7 @@ CompressionSystem::CompressionSystem(int numParticles, double lambda) {
   _measures.push_back(new PerimeterMeasure("Perimeter", 1, *this));
 }
 
+
 bool CompressionSystem::hasTerminated() const {
   #ifdef QT_DEBUG
     if (!isConnected(particles)) {
@@ -369,6 +368,7 @@ bool CompressionSystem::hasTerminated() const {
 
   return false;
 }
+
 
 PerimeterMeasure::PerimeterMeasure(const QString name, const unsigned int freq,
                                    CompressionSystem& system)
@@ -390,3 +390,4 @@ double PerimeterMeasure::calculate() const {
 
   return (3 * _system.size()) - (numEdges / 2) - 3;
 }
+
