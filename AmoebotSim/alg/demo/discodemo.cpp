@@ -32,10 +32,24 @@ void DiscoDemoParticle::activate() {
     if (canExpand(expandDir)) {
       expand(expandDir);
     }
-  } else {  // isExpanded().
-    contractTail();
-  }
+  } else {
+      for (int label : headLabels()) {
+        if (hasNbrAtLabel(label) && nbrAtLabel(label)._state == State::Blue) {
+            nbrAtLabel(label)._state = State::Red;
+        }
+        break;
+      }
+    for (int label : tailLabels()) {
+      if (hasNbrAtLabel(label) && nbrAtLabel(label)._state != State::Blue) {
+          nbrAtLabel(label)._state = State::Red;
+
+          break;
+      }
 }
+contractTail();
+}
+}
+
 
 int DiscoDemoParticle::headMarkColor() const {
   switch(_state) {
@@ -86,10 +100,14 @@ DiscoDemoParticle::State DiscoDemoParticle::getRandColor() const {
   return static_cast<State>(randInt(0, 2)); //MichaelM integers correspond to the existing colors
 }                                           //(only red and blue at the moment)
 
+DiscoDemoParticle& DiscoDemoParticle::nbrAtLabel(int label) const {
+  return AmoebotParticle::nbrAtLabel<DiscoDemoParticle>(label);
+}
+
 DiscoDemoSystem::DiscoDemoSystem(unsigned int numParticles, int counterMax) {
   // In order to enclose an area that's roughly 3.7x the # of particles using a
   // regular hexagon, the hexagon should have side length 1.4*sqrt(# particles).
-  int sideLen = static_cast<int>(std::round(4 * std::sqrt(numParticles)));      //MichaelM changed 1.4 * std::sqrt
+  int sideLen = static_cast<int>(std::round(2 * std::sqrt(numParticles)));      //MichaelM changed 1.4 * std::sqrt
   Node boundNode(0, 0);                                                         //to 4 * std::sqrt (larger area)
   for (int dir = 0; dir < 6; ++dir) {                                           //1.4 is original size
     for (int i = 0; i < sideLen; ++i) {
@@ -118,10 +136,10 @@ DiscoDemoSystem::DiscoDemoSystem(unsigned int numParticles, int counterMax) {
       //MichaelM: experimental addition of inserting new particle as # activations increases,
       //but error codes result and particles clone themselves only at the very beginning
 
-     if (getCount("# Activations")._value % 10 == 0) {
-      insert(new DiscoDemoParticle(node, -1, randDir(), *this, counterMax));
-      occupied.insert(node);
-      }
+//     if (getCount("# Activations")._value % 10 == 0) {
+//      insert(new DiscoDemoParticle(node, -1, randDir(), *this, counterMax));
+//      occupied.insert(node);
+//      }
 
     }
   }

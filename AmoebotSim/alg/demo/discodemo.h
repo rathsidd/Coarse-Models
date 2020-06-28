@@ -51,6 +51,8 @@ class DiscoDemoParticle : public AmoebotParticle {
   // snapshot the current values of this particle's memory at runtime.
   QString inspectionText() const override;
 
+ DiscoDemoParticle& nbrAtLabel(int label) const;
+
  protected:
   // Returns a random State.
   State getRandColor() const;
