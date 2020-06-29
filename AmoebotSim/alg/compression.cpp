@@ -18,14 +18,15 @@ CompressionParticle::CompressionParticle(const Node head,
   : AmoebotParticle(head, globalTailDir, orientation, system),
     lambda(lambda),
     q(0),
-    numNbrsBefore(0),
+    numRedNbrsBefore(0),
+    numBlueNbrsBefore(0),
     flag(false) {
     _state = getRandColor(); //MichaelM added getRandColor function so compression particles have color
 }
 
 void CompressionParticle::activate() {
 
-    if (_state != State::Blue) { //MichaelM added if statement so that only red particles follow compression alg
+    if (_state == State::Red) { //MichaelM added if statement so that only red particles follow compression alg
 
   if (isContracted()) {
     int expandDir = randDir();  // Select a random neighboring location.
@@ -33,50 +34,78 @@ void CompressionParticle::activate() {
 
     if (canExpand(expandDir) && !hasExpNbr()) {
       // Count neighbors in original position and expand.
-      numNbrsBefore = nbrCount(uniqueLabels());
+
+
+      numRedNbrsBefore = redNbrCount(uniqueLabels());
       expand(expandDir);
       flag = !hasExpNbr();
     }
   } else {  // isExpanded().
-    if (!flag || numNbrsBefore == 5) {
+    if (!flag || numRedNbrsBefore == 5) {
       contractHead();
     } else {
       // Count neighbors in new position and compute the set S.
-      int numNbrsAfter = nbrCount(headLabels());
+      int numRedNbrsAfter = redNbrCount(headLabels());
       std::vector<int> S;
       for (const int label : {headLabels()[4], tailLabels()[4]}) {
         if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
           S.push_back(label);
-        }
+        } //MichaelM: DONT UNDERSTAND WHAT ABOVE 3 LINES DO? MAY CAUSE PROBLEMS!
       }
 
       // If the conditions are satisfied, contract to the new position;
       // otherwise, contract back to the original one.
-      if ((q < pow(lambda, numNbrsAfter - numNbrsBefore))
-          && (checkProp1(S) || checkProp2(S))) {
+      if ((q < pow(lambda, numRedNbrsAfter - numRedNbrsBefore))
+          && (checkRedProp1(S) || checkRedProp2(S))) {
         contractTail();
       } else {
         contractHead();
       }
     }
   }
-  //MichaelM added passive particle motion for blue particles since they
- // don't follow compression algorithm in this case (how DiscoDemoParticle moves)
-}  else if (isContracted()) {
-        int expandDir = randDir();
-        if (canExpand(expandDir)) {
-          expand(expandDir);
-        }
-      } else {  // isExpanded().
-        contractTail();
-      }
+}  else if (_state == State::Blue) {
+        if (isContracted()) {
+            int expandDir = randDir();  // Select a random neighboring location.
+            q = randDouble(0, 1);        // Select a random q in (0,1).
+
+            if (canExpand(expandDir) && !hasExpNbr()) {
+              // Count neighbors in original position and expand.
+
+                numBlueNbrsBefore = blueNbrCount(uniqueLabels());
+                expand(expandDir);
+                flag = !hasExpNbr();
+            }
+        } else {  // isExpanded().
+            if (!flag || numBlueNbrsBefore == 5) {
+              contractHead();
+            } else {
+              // Count neighbors in new position and compute the set S.
+              int numBlueNbrsAfter = blueNbrCount(headLabels());
+              std::vector<int> S;
+              for (const int label : {headLabels()[4], tailLabels()[4]}) {
+                if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
+                  S.push_back(label);
+                } //MichaelM: DONT UNDERSTAND WHAT ABOVE 3 LINES DO? MAY CAUSE PROBLEMS!
+              }
+
+              // If the conditions are satisfied, contract to the new position;
+              // otherwise, contract back to the original one.
+              if ((q < pow(lambda, numBlueNbrsAfter - numBlueNbrsBefore))
+                  && (checkBlueProp1(S) || checkBlueProp2(S))) {
+                contractTail();
+              } else {
+                contractHead();
+              }
+            }
+          }
     }
+}
 
    int CompressionParticle::headMarkColor() const {
      switch(_state) {
        case State::Red:    return 0xff0000;
        case State::Blue:  return 0x0000ff;
-       case State::Red2: return 0xff0000;
+    //   case State::Red2: return 0xff0000;
       /* case State::Green:  return 0x00ff00;
        case State::Blue:   return 0x0000ff;
        case State::Indigo: return 0x4b0082;
@@ -91,7 +120,7 @@ void CompressionParticle::activate() {
      return headMarkColor();
    }
 
-QString CompressionParticle::inspectionText() const {
+/* QString CompressionParticle::inspectionText() const {
   QString text;
   text += "Global Info:\n";
   text += "  head: (" + QString::number(head.x) + ", "
@@ -103,7 +132,7 @@ QString CompressionParticle::inspectionText() const {
   text += "  q in (0,1) = " + QString::number(q) + ",\n";
   text += "  flag = " + QString::number(flag) + ".\n";
 
-  if(isContracted()) {
+ if(isContracted()) {
     text += "Contracted properties:\n";
     text += "  #neighbors before = " + QString::number(numNbrsBefore) + ",\n";
   } else {  // isExpanded().
@@ -115,6 +144,7 @@ QString CompressionParticle::inspectionText() const {
 
   return text;
 }
+*/ //MichaelM removed Qstring because numNbrsBefore no longer matched and is unnecessary
 
 CompressionParticle& CompressionParticle::nbrAtLabel(int label) const {
   return AmoebotParticle::nbrAtLabel<CompressionParticle>(label);
@@ -135,42 +165,55 @@ bool CompressionParticle::hasExpHeadAtLabel(const int label) const {
          && nbrAtLabel(label).pointsAtMyHead(*this, label);
 }
 
-int CompressionParticle::nbrCount(std::vector<int> labels) const {
-  int numNbrs = 0;
+int CompressionParticle::redNbrCount(std::vector<int> labels) const {
+  int numRedNbrs = 0;
   for (const int label : labels) {
-    if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
-      ++numNbrs;
+    if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
+      ++numRedNbrs;
     }
   }
 
-  return numNbrs;
+  return numRedNbrs;
 }
 
-bool CompressionParticle::checkProp1(std::vector<int> S) const {
+int CompressionParticle::blueNbrCount(std::vector<int> labels) const {
+  int numBlueNbrs = 0;
+  for (const int label : labels) {
+    if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Blue) {
+      ++numBlueNbrs;
+    }
+  }
+
+  return numBlueNbrs;
+}
+
+
+
+bool CompressionParticle::checkRedProp1(std::vector<int> S) const {
   Q_ASSERT(isExpanded());
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
-if (_state != State::Blue && q < 0.9) { //MichaelM only Red particles follow compression algorithm,
+if (_state == State::Red && q < 1) { //MichaelM only Red particles follow compression algorithm,
                                           //since q is randomly gen. between 0, 1 then prop1 rate of satisfaction is variable
                                           //affecting rate of diffusivity
   if (S.size() == 0) {
     return false;  // S has to be nonempty for Property 1.
   } else {
     const std::vector<int> labels = uniqueLabels();
-    std::set<int> adjNbrs;
+    std::set<int> redAdjNbrs;
 
     // Starting from the particles in S, sweep out and mark connected neighbors.
     for (int s : S) {
-      adjNbrs.insert(s);
+      redAdjNbrs.insert(s);
       int i = distance(labels.begin(), find(labels.begin(), labels.end(), s));
 
       // First sweep counter-clockwise, stopping when an unoccupied position or
       // expanded head is encountered.
       for (uint offset = 1; offset < labels.size(); ++offset) {
         int label = labels[(i + offset) % labels.size()];
-        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
-          adjNbrs.insert(label);
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
+          redAdjNbrs.insert(label);
         } else {
           break;
         }
@@ -179,8 +222,8 @@ if (_state != State::Blue && q < 0.9) { //MichaelM only Red particles follow com
       // Then sweep clockwise.
       for (uint offset = 1; offset < labels.size(); ++offset) {
         int label = labels[(i - offset + labels.size()) % labels.size()];
-        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
-          adjNbrs.insert(label);
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
+          redAdjNbrs.insert(label);
         } else {
           break;
         }
@@ -190,46 +233,98 @@ if (_state != State::Blue && q < 0.9) { //MichaelM only Red particles follow com
     // If all neighbors are connected to a particle in S by a path through the
     // neighborhood, then the number of labels in adjNbrs should equal the total
     // number of neighbors.
-    return adjNbrs.size() == (uint)nbrCount(labels);
+    return redAdjNbrs.size() == (uint)redNbrCount(labels); //MichaelM originally was just "nbrCount"
   }
 }
-}//MichaelM: I get the error code "control may reach end of non-void function"
-//I think I need something to break the if statement at the beginning of "checkprop"
+}
 
-bool CompressionParticle::checkProp2(std::vector<int> S) const {
+bool CompressionParticle::checkBlueProp1(std::vector<int> S) const {
   Q_ASSERT(isExpanded());
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
- if (_state != State::Blue && q < 0.9) {   //MichaelM only Red particles follow compression algorithm,
+if (_state == State::Blue && q < 1) { //MichaelM only Red particles follow compression algorithm,
+                                          //since q is randomly gen. between 0, 1 then prop1 rate of satisfaction is variable
+                                          //affecting rate of diffusivity
+  if (S.size() == 0) {
+    return false;  // S has to be nonempty for Property 1.
+  } else {
+    const std::vector<int> labels = uniqueLabels();
+    std::set<int> blueAdjNbrs;
+
+    // Starting from the particles in S, sweep out and mark connected neighbors.
+    for (int s : S) {
+      blueAdjNbrs.insert(s);
+      int i = distance(labels.begin(), find(labels.begin(), labels.end(), s));
+
+      // First sweep counter-clockwise, stopping when an unoccupied position or
+      // expanded head is encountered.
+      for (uint offset = 1; offset < labels.size(); ++offset) {
+        int label = labels[(i + offset) % labels.size()];
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Blue) {
+          blueAdjNbrs.insert(label);
+        } else {
+          break;
+        }
+      }
+
+      // Then sweep clockwise.
+      for (uint offset = 1; offset < labels.size(); ++offset) {
+        int label = labels[(i - offset + labels.size()) % labels.size()];
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Blue) {
+          blueAdjNbrs.insert(label);
+        } else {
+          break;
+        }
+      }
+    }
+
+    // If all neighbors are connected to a particle in S by a path through the
+    // neighborhood, then the number of labels in adjNbrs should equal the total
+    // number of neighbors.
+    return blueAdjNbrs.size() == (uint)blueNbrCount(labels); //MichaelM originally was just "nbrCount"
+  }
+}
+
+}
+
+//MichaelM: I get the error code "control may reach end of non-void function"
+//I think I need something to break the if statement at the beginning of "checkprop"
+
+bool CompressionParticle::checkRedProp2(std::vector<int> S) const {
+  Q_ASSERT(isExpanded());
+  Q_ASSERT(S.size() <= 2);
+  Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
+
+ if (_state == State::Red && q < 1) {   //MichaelM only Red particles follow compression algorithm,
                                              //since q is randomly gen. between 0, 1 then prop2 rate of satisfaction is variable
                                              //affecting rate of diffusivity
   if (S.size() == 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster
                            // S has to be empty for Property 2.
     return true;  //MichaelM changed "return false" to "return true"
   } else {
-    const int numHeadNbrs = nbrCount(headLabels());
-    const int numTailNbrs = nbrCount(tailLabels());
+    const int numRedHeadNbrs = redNbrCount(headLabels());
+    const int numRedTailNbrs = redNbrCount(tailLabels());
 
     // Check if the head's neighbors are connected.
-    int numAdjHeadNbrs = 0;
+    int numRedAdjHeadNbrs = 0;
     bool seenNbr = false;
     for (const int label : headLabels()) {
-      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
         seenNbr = true;
-        ++numAdjHeadNbrs;
+        ++numRedAdjHeadNbrs;
       } else if (seenNbr) {
         break;
       }
     }
 
     // Check if the tail's neighbors are connected.
-    int numAdjTailNbrs = 0;
+    int numRedAdjTailNbrs = 0;
     seenNbr = false;
     for (const int label : tailLabels()) {
-      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
         seenNbr = true;
-        ++numAdjTailNbrs;
+        ++numRedAdjTailNbrs;
       } else if (seenNbr) {
         break;
       }
@@ -237,17 +332,65 @@ bool CompressionParticle::checkProp2(std::vector<int> S) const {
 
     // Property 2 is satisfied if both the head and tail have at least one
     // neighbor and all head (tail) neighbors are connected.
-    return (numHeadNbrs > 0) && (numTailNbrs > 0) &&
-           (numHeadNbrs == numAdjHeadNbrs) && (numTailNbrs == numAdjTailNbrs);
+    return (numRedHeadNbrs > 0) && (numRedTailNbrs > 0) &&
+           (numRedHeadNbrs == numRedAdjHeadNbrs) && (numRedTailNbrs == numRedAdjTailNbrs);
   }
 }
+}
+
+bool CompressionParticle::checkBlueProp2(std::vector<int> S) const {
+  Q_ASSERT(isExpanded());
+  Q_ASSERT(S.size() <= 2);
+  Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
+
+ if (_state == State::Blue && q < 1) {   //MichaelM only Red particles follow compression algorithm,
+                                             //since q is randomly gen. between 0, 1 then prop2 rate of satisfaction is variable
+                                             //affecting rate of diffusivity
+  if (S.size() == 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster
+                           // S has to be empty for Property 2.
+    return true;  //MichaelM changed "return false" to "return true"
+  } else {
+    const int numBlueHeadNbrs = blueNbrCount(headLabels());
+    const int numBlueTailNbrs = blueNbrCount(tailLabels());
+
+    // Check if the head's neighbors are connected.
+    int numBlueAdjHeadNbrs = 0;
+    bool seenNbr = false;
+    for (const int label : headLabels()) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Blue) {
+        seenNbr = true;
+        ++numBlueAdjHeadNbrs;
+      } else if (seenNbr) {
+        break;
+      }
+    }
+
+    // Check if the tail's neighbors are connected.
+    int numBlueAdjTailNbrs = 0;
+    seenNbr = false;
+    for (const int label : tailLabels()) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Blue) {
+        seenNbr = true;
+        ++numBlueAdjTailNbrs;
+      } else if (seenNbr) {
+        break;
+      }
+    }
+
+    // Property 2 is satisfied if both the head and tail have at least one
+    // neighbor and all head (tail) neighbors are connected.
+    return (numBlueHeadNbrs > 0) && (numBlueTailNbrs > 0) &&
+           (numBlueHeadNbrs == numBlueAdjHeadNbrs) && (numBlueTailNbrs == numBlueAdjTailNbrs);
+  }
+}
+
 } //MichaelM: I get the error code "control may reach end of non-void function"
   //I think I need something to break the if statement at the beginning of "checkprop"
 
 //MichaelM added this similar to discodemo so that compression particles get a color
 CompressionParticle::State CompressionParticle::getRandColor() const {
     //Randomly select an integer and return the corresponding state via casting
-    return static_cast<State>(randInt(0,3));
+    return static_cast<State>(randInt(0,2));
 }
 
 

@@ -30,7 +30,7 @@ class CompressionParticle : public AmoebotParticle {
     enum class State {
         Red,
         Blue,
-        Red2,           //MichaelM added enum class like in Disco Demo to have two colors.
+  //      Red2,           //MichaelM added enum class like in Disco Demo to have two colors.
     };                  //Red2 exists so that Red is twice as likely to occur as blue
                         //and so red clusters together more consistently
 
@@ -39,14 +39,15 @@ class CompressionParticle : public AmoebotParticle {
 
   // Returns the string to be displayed when this particle is inspected; used
   // to snapshot the current values of this particle's memory at runtime.
-  virtual QString inspectionText() const;
+ // virtual QString inspectionText() const;
     int headMarkColor() const; //MichaelM added head and tail colors, also removed "const override;" to "const;"
     int tailMarkColor() const; //Not sure if this causes problems.
 protected:
   // Particle memory.
   const double lambda;
   double q;
-  int numNbrsBefore;
+  int numRedNbrsBefore;
+  int numBlueNbrsBefore;
   bool flag;
   State getRandColor() const;   //MichaelM added states (like in DiscoDemo)
 
@@ -67,11 +68,14 @@ private:
 
   // Counts the number of neighbors in the labeled positions. Note: this
   // implicitly assumes all neighbors are unique, as none are expanded.
-  int nbrCount(std::vector<int> labels) const;
+  int redNbrCount(std::vector<int> labels) const;
+  int blueNbrCount(std::vector<int> labels) const;
 
   // Functions for checking Properties 1 and 2 of the compression algorithm.
-  bool checkProp1(std::vector<int> S) const;
-  bool checkProp2(std::vector<int> S) const;
+  bool checkRedProp1(std::vector<int> S) const;
+  bool checkRedProp2(std::vector<int> S) const;
+  bool checkBlueProp1(std::vector<int> S) const;
+  bool checkBlueProp2(std::vector<int> S) const;
 };
 
 class CompressionSystem : public AmoebotSystem {
