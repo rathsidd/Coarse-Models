@@ -88,7 +88,7 @@ void ParameterListModel::createSystem(QString algName) {
         instantiate(params[0].toInt(), params[1].toInt());
   } else if (signature == "compression") {
     dynamic_cast<CompressionAlg*>(alg)->
-        instantiate(params[0].toInt(), params[1].toDouble());
+        instantiate(params[0].toInt(), params[1].toInt(), params[2].toDouble());
   } else if (signature == "infobjcoating") {
     dynamic_cast<InfObjCoatingAlg*>(alg)->
         instantiate(params[0].toInt(), params[1].toDouble());
