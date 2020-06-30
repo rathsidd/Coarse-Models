@@ -14,15 +14,15 @@ CompressionParticle::CompressionParticle(const Node head,
                                          const int globalTailDir,
                                          const int orientation,
                                          AmoebotSystem& system,
-                                         const double lambda)
+                                         const double lambda,
+                                         State state)
   : AmoebotParticle(head, globalTailDir, orientation, system),
     lambda(lambda),
     q(0),
     numRedNbrsBefore(0),
     numBlueNbrsBefore(0),
-    flag(false) {
-    _state = getRandColor(); //MichaelM added getRandColor function so compression particles have color
-}
+    flag(false),
+    _state(state) {}
 
 void CompressionParticle::activate() {
 
@@ -101,20 +101,15 @@ void CompressionParticle::activate() {
     }
 }
 
-   int CompressionParticle::headMarkColor() const {
-     switch(_state) {
-       case State::Red:    return 0xff0000;
-       case State::Blue:  return 0x0000ff;
-    //   case State::Red2: return 0xff0000;
-      /* case State::Green:  return 0x00ff00;
-       case State::Blue:   return 0x0000ff;
-       case State::Indigo: return 0x4b0082;
-       case State::Violet: return 0xbb00ff; //MichaelM removed extra colors, added Red2 so Red occurs twice as often
-       */                                   //and so red clusters more consistently
-     }
-
-     return -1;
-   }
+int CompressionParticle::headMarkColor() const {
+  if (_state == State::Red) {
+      return 0xff0000;
+  }
+  else if (_state == State::Blue){
+      return 0x0000ff;
+  }
+  return -1;
+}
 
    int CompressionParticle::tailMarkColor() const {
      return headMarkColor();
@@ -145,6 +140,7 @@ void CompressionParticle::activate() {
   return text;
 }
 */ //MichaelM removed Qstring because numNbrsBefore no longer matched and is unnecessary
+   //This removal may cause problems when trying to do different colored particles
 
 CompressionParticle& CompressionParticle::nbrAtLabel(int label) const {
   return AmoebotParticle::nbrAtLabel<CompressionParticle>(label);
@@ -388,17 +384,18 @@ bool CompressionParticle::checkBlueProp2(std::vector<int> S) const {
   //I think I need something to break the if statement at the beginning of "checkprop"
 
 //MichaelM added this similar to discodemo so that compression particles get a color
-CompressionParticle::State CompressionParticle::getRandColor() const {
+/*CompressionParticle::State CompressionParticle::getRandColor() const {
     //Randomly select an integer and return the corresponding state via casting
     return static_cast<State>(randInt(0,2));
-}
+}*/
 
 
-CompressionSystem::CompressionSystem(int numParticles, double lambda) {
+CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int numBlueParticles, double lambda) {
   Q_ASSERT(lambda > 1);
 
+  //  int numParticles = numBlueParticles + numRedParticles;
     //MichaelM added hexagon creation and random particle insertion similar to DiscoDemo but for CompressionParticles
-    int sideLen = static_cast<int>(std::round(3.0 * std::sqrt(numParticles))); //MichaelM changed 1.4 to 3.0 (control hexagon size)
+    int sideLen = static_cast<int>(std::round(20)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
      Node boundNode(0, 0);                                                     //perhaps make this a variable? to easily modify?
      for (int dir = 0; dir < 6; ++dir) {
        for (int i = 0; i < sideLen; ++i) {
@@ -411,96 +408,41 @@ CompressionSystem::CompressionSystem(int numParticles, double lambda) {
       // above, the nodes (x,y) strictly within the hexagon have (i) -s < x < s,
       // (ii) 0 < y < 2s, and (iii) 0 < x+y < 2s. Choose interior nodes at random to
       // place particles, ensuring at most one particle is placed at each node.
-      std::set<Node> occupied;
-      while (occupied.size() < numParticles) { //MichaelM: comparison of integers of different signs?
-                                               //unsure about this error code
-        // First, choose an x and y position at random from the (i) and (ii) bounds.
-        int x = randInt(-sideLen + 1, sideLen);
-        int y = randInt(1, 2 * sideLen);
-        Node node(x, y);
 
-        // If the node satisfies (iii) and is unoccupied, place a particle there.
-        if (0 < x + y && x + y < 2 * sideLen
-            && occupied.find(node) == occupied.end()) {
-          insert(new CompressionParticle(node, -1, randDir(), *this, lambda));
-          occupied.insert(node);
-        }
-      }
+     std::set<Node> occupied;
+   //  unsigned int numParticlesAdded = 0;
+     unsigned int numRedAdded = 0;
+     while (numRedAdded < numRedParticles) {
+       // First, choose an x and y position at random from the (i) and (ii) bounds.
+       int x = randInt(-sideLen + 1, sideLen);
+       int y = randInt(1, 2 * sideLen);
+       Node node(x, y);
 
-   /*         if (getCount("# Activations")._value % 5 == 1) {
-                int x = randInt(-sideLen + 1, sideLen);
-                int y = randInt(1, 2 * sideLen);
-                Node node(x, y);
+       // If the node satisfies (iii) and is unoccupied, place a particle there.
+       if (0 < x + y && x + y < 2 * sideLen
+           && occupied.find(node) == occupied.end()) {
+         insert(new CompressionParticle(node, -1, randDir(), *this, lambda, CompressionParticle::State::Red));
+         occupied.insert(node);
+         numRedAdded++;
+       }
+   }
 
-                    if (0 < x + y && x + y < 2 * sideLen
-                        && occupied.find(node) == occupied.end()) {
-                      insert(new CompressionParticle(node, -1, randDir(), *this, lambda));
-                      occupied.insert(node);
-                    }
+     unsigned int numBlueAdded = 0;
+     while (numBlueAdded < numBlueParticles) {
+       // First, choose an x and y position at random from the (i) and (ii) bounds.
+       int x = randInt(-sideLen + 1, sideLen);
+       int y = randInt(1, 2 * sideLen);
+       Node blueNode(x, y);
 
-               } */
-   //   ^^MichaelM experimental code. Doesnt work.
-
-
-  // Initialize particle system.
-/*  if (lambda <= 2.17) {  // In the proven range of expansion, make a hexagon.
-    int x, y;
-    for (int i = 1; i <= numParticles; ++i) {
-      int layer = 1;
-      int position = i - 1;
-      while (position - (6 * layer) >= 0) {
-        position -= 6 * layer;
-        ++layer;
-      }
-
-      switch(position / layer) {
-        case 0: {
-          x = layer;
-          y = (position % layer) - layer;
-          if (position % layer == 0) {x -= 1; y += 1;}  // Corner case.
-          break;
-        }
-        case 1: {
-          x = layer - (position % layer);
-          y = position % layer;
-          break;
-        }
-        case 2: {
-          x = -1 * (position % layer);
-          y = layer;
-          break;
-        }
-        case 3: {
-          x = -1 * layer;
-          y = layer - (position % layer);
-          break;
-        }
-        case 4: {
-          x = (position % layer) - layer;
-          y = -1 * (position % layer);
-          break;
-        }
-        case 5: {
-          x = (position % layer);
-          y = -1 * layer;
-          break;
-        }
-      }
-
-      insert(new CompressionParticle(Node(x, y), -1, randDir(), *this, lambda));
-    }
-  } else {  // In the unknown range or compression range, make a straight line.
-    for (int i = 0; i < numParticles; ++i) {
-      insert(new CompressionParticle(Node(i, 0), -1, randDir(), *this, lambda));
-    }
-  }
-*/ //MichaelM commented this out because we dont want particles to initialize in a line or a hexagon, we want
-   //random dispersion within a hexagon.
-
-  // Set up metrics.
-  _measures.push_back(new PerimeterMeasure("Perimeter", 1, *this));
-}
-
+       // If the node satisfies (iii) and is unoccupied, place a particle there.
+       if (0 < x + y && x + y < 2 * sideLen
+           && occupied.find(blueNode) == occupied.end()) {
+         insert(new CompressionParticle(blueNode, -1, randDir(), *this, lambda, CompressionParticle::State::Blue));
+         occupied.insert(blueNode);
+         numBlueAdded++;
+       }
+   }
+   }
 
 bool CompressionSystem::hasTerminated() const {
   #ifdef QT_DEBUG

@@ -20,19 +20,20 @@ class CompressionParticle : public AmoebotParticle {
   friend class CompressionSystem;
   friend class PerimeterMeasure;
 
+  enum class State {
+      Red,
+      Blue,
+  };
+
  public:
   // Constructs a new particle with a node position for its head, a global
   // compass direction from its head to its tail (-1 if contracted), an offset
   // for its local compass, a system which it belongs to, and a bias parameter.
   CompressionParticle(const Node head, const int globalTailDir,
                       const int orientation, AmoebotSystem& system,
-                      const double lambda);
-    enum class State {
-        Red,
-        Blue,
-  //      Red2,           //MichaelM added enum class like in Disco Demo to have two colors.
-    };                  //Red2 exists so that Red is twice as likely to occur as blue
-                        //and so red clusters together more consistently
+                      const double lambda,
+                      State state);
+
 
   // Executes one particle activation.
   virtual void activate();
@@ -49,10 +50,10 @@ protected:
   int numRedNbrsBefore;
   int numBlueNbrsBefore;
   bool flag;
-  State getRandColor() const;   //MichaelM added states (like in DiscoDemo)
+  State _state;   //MichaelM added states (like in DiscoDemo)
 
   //Member variables:
-  State _state;     //MichaelM added states
+     //MichaelM added states
 
 private:
   // Gets a reference to the neighboring particle incident to the specified port
@@ -86,7 +87,7 @@ class CompressionSystem : public AmoebotSystem {
   // generated surface (with no tunnels). Takes an optionally specified size
   // (#particles) and a bias parameter. A bias above 2 + sqrt(2) will provably
   // yield compression; a bias below 2.17 will provably yield expansion.
-  CompressionSystem(int numParticles = 100, double lambda = 4.0);
+  CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, double lambda = 4.0);
 
   // Because this algorithm never terminates, this simply returns false.
   virtual bool hasTerminated() const;
