@@ -56,19 +56,19 @@ void Algorithm::addParameter(QString parameter, QString defaultValue) {
 }
 
 DiscoDemoAlg::DiscoDemoAlg() : Algorithm("Demo: Disco", "discodemo") {
-  addParameter("# Particles", "30");
-  addParameter("Counter Max", "5");
+    addParameter("# Particles", "30");
+    addParameter("Counter Max", "5");
 };
 
 void DiscoDemoAlg::instantiate(const int numParticles, const int counterMax) {
-  if (numParticles <= 0) {
-    emit log("# particles must be > 0", true);
-  } else if (counterMax <= 0) {
-    emit log("counterMax must be > 0", true);
-  } else {
-    emit setSystem(std::make_shared<DiscoDemoSystem>(numParticles));
+    if (numParticles <= 0) {
+      emit log("# particles must be > 0", true);
+    } else if (counterMax <= 0) {
+      emit log("counterMax must be > 0", true);
+    } else {
+      emit setSystem(std::make_shared<DiscoDemoSystem>(numParticles));
+    }
   }
-}
 
 MetricsDemoAlg::MetricsDemoAlg() : Algorithm("Demo: Metrics", "metricsdemo") {
   addParameter("# Particles", "30");
@@ -109,17 +109,25 @@ void TokenDemoAlg::instantiate(const int numParticles, const int lifetime) {
 }
 
 CompressionAlg::CompressionAlg() : Algorithm("Compression", "compression") {
-  addParameter("# Particles", "100");
+  addParameter("# Red Particles", "15");
+  addParameter("# Blue Particles", "15");
   addParameter("Lambda", "4.0");
 }
 
-void CompressionAlg::instantiate(const int numParticles, const double lambda) {
-  if (numParticles <= 0) {
-    emit log("# particles must be > 0", true);
-  } else {
-    emit setSystem(std::make_shared<CompressionSystem>(numParticles, lambda));
+void CompressionAlg::instantiate(const int numRedParticles, const int numBlueParticles, const double lambda) {
+    if (numRedParticles <= 0) {
+      emit log("# red particles must be > 0", true);
+    }
+    if (numBlueParticles <= 0) {
+      emit log("# blue particles must be > 0", true);
+    }
+    else if (lambda <= 0) {
+      emit log("lambda must be > 0", true);
+    } else {
+      emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles));
+    }
   }
-}
+
 
 InfObjCoatingAlg::InfObjCoatingAlg() :
   Algorithm("Infinite Object Coating", "infobjcoating") {

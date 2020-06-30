@@ -56,7 +56,7 @@ class DiscoDemoAlg : public Algorithm {
   DiscoDemoAlg();
 
  public slots:
-  void instantiate(const int numParticles = 30, const int counterMax = 5);
+  void instantiate(const int numParticles = 30, int counterMax = 5);
 };
 
 // Demo: Metrics.
@@ -100,7 +100,7 @@ class CompressionAlg : public Algorithm {
   CompressionAlg();
 
  public slots:
-  void instantiate(const int numParticles = 100, const double lambda = 4.0);
+  void instantiate(const int numRedParticles = 15, const int numBlueParticles = 15, const double lambda = 4.0);
 };
 
 // Infinite Object Coating.
