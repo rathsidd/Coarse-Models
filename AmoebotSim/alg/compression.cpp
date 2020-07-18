@@ -26,44 +26,71 @@ CompressionParticle::CompressionParticle(const Node head,
 
 void CompressionParticle::activate() {
 
-    if (_state == State::Red) { //MichaelM added if statement so that only red particles follow compression alg
+    if (_state == State::Red) {
 
-  if (isContracted()) {
-    int expandDir = randDir();  // Select a random neighboring location.
-    q = randDouble(0, 1);        // Select a random q in (0,1).
+       if (isContracted()) {
+           q = randDouble(0, 1);
+           int expandDir = randDir();
+    /*       if (q< 0.5) {
+               expandDir = 3;
+           } else {
+               expandDir = 3;
+           } */
 
-    if (canExpand(expandDir) && !hasExpNbr()) {
+       if (canExpand(expandDir) && !hasExpNbr()) {
       // Count neighbors in original position and expand.
-
-
       numRedNbrsBefore = redNbrCount(uniqueLabels());
       expand(expandDir);
       flag = !hasExpNbr();
     }
+
   } else {  // isExpanded().
-    if (!flag || numRedNbrsBefore == 5) {
-      contractHead();
-    } else {
+     int numRedNbrsAfter = redNbrCount(headLabels());
+     double x = 1; //Diffusion Rate without neighbors. All values acceptable.
+     double y = 0.9; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
+     double z = 0.02; //Affinity to detach from cluster. Values less than .1 are acceptable.
+
+     if (!flag || numRedNbrsBefore == 5) {
+contractHead();
+}
+        else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q < x) { //Diffusion rate
+             contractTail();
+         }
+     else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q > x) {
+         contractHead();
+     }
+
+     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q < y) {
+         contractTail();
+     }
+     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q > y) {
+         contractHead();
+     }
+    else {
       // Count neighbors in new position and compute the set S.
-      int numRedNbrsAfter = redNbrCount(headLabels());
+//      int numRedNbrsAfter = redNbrCount(headLabels());
       std::vector<int> S;
       for (const int label : {headLabels()[4], tailLabels()[4]}) {
         if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
           S.push_back(label);
-        } //MichaelM: DONT UNDERSTAND WHAT ABOVE 3 LINES DO? MAY CAUSE PROBLEMS!
+        }
+      }
+
+      if (q < z) {
+          contractTail();
       }
 
       // If the conditions are satisfied, contract to the new position;
       // otherwise, contract back to the original one.
-      if ((q < pow(lambda, numRedNbrsAfter - numRedNbrsBefore))
+      else if ((q < pow(lambda, numRedNbrsAfter - numRedNbrsBefore))
           && (checkRedProp1(S) || checkRedProp2(S))) {
         contractTail();
-      } else {
+      }  else {
         contractHead();
       }
     }
   }
-}  else if (_state == State::Blue) {
+ /*   else if (_state == State::Blue) {
         if (isContracted()) {
             int expandDir = randDir();  // Select a random neighboring location.
             q = randDouble(0, 1);        // Select a random q in (0,1).
@@ -98,8 +125,10 @@ void CompressionParticle::activate() {
               }
             }
           }
-    }
+    } */
 }
+}
+
 
 int CompressionParticle::headMarkColor() const {
   if (_state == State::Red) {
@@ -190,7 +219,7 @@ bool CompressionParticle::checkRedProp1(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
-if (_state == State::Red && q < 1) { //MichaelM only Red particles follow compression algorithm,
+if (_state == State::Red) { //MichaelM only Red particles follow compression algorithm,
                                           //since q is randomly gen. between 0, 1 then prop1 rate of satisfaction is variable
                                           //affecting rate of diffusivity
   if (S.size() == 0) {
@@ -239,7 +268,7 @@ bool CompressionParticle::checkBlueProp1(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
-if (_state == State::Blue && q < 1) { //MichaelM only Red particles follow compression algorithm,
+if (_state == State::Blue && q < 0.1) { //MichaelM only Red particles follow compression algorithm,
                                           //since q is randomly gen. between 0, 1 then prop1 rate of satisfaction is variable
                                           //affecting rate of diffusivity
   if (S.size() == 0) {
@@ -292,12 +321,11 @@ bool CompressionParticle::checkRedProp2(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
- if (_state == State::Red && q < 1) {   //MichaelM only Red particles follow compression algorithm,
+ if (_state == State::Red) {   //MichaelM only Red particles follow compression algorithm,
                                              //since q is randomly gen. between 0, 1 then prop2 rate of satisfaction is variable
                                              //affecting rate of diffusivity
-  if (S.size() == 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster
-                           // S has to be empty for Property 2.
-    return true;  //MichaelM changed "return false" to "return true"
+  if (S.size() != 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster                           // S has to be empty for Property 2.
+    return false;  //MichaelM changed "return false" to "return true"
   } else {
     const int numRedHeadNbrs = redNbrCount(headLabels());
     const int numRedTailNbrs = redNbrCount(tailLabels());
@@ -339,7 +367,7 @@ bool CompressionParticle::checkBlueProp2(std::vector<int> S) const {
   Q_ASSERT(S.size() <= 2);
   Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
- if (_state == State::Blue && q < 1) {   //MichaelM only Red particles follow compression algorithm,
+ if (_state == State::Blue && q < 0.1) {   //MichaelM only Red particles follow compression algorithm,
                                              //since q is randomly gen. between 0, 1 then prop2 rate of satisfaction is variable
                                              //affecting rate of diffusivity
   if (S.size() == 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster
@@ -428,6 +456,7 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
    }
 
      unsigned int numBlueAdded = 0;
+     if (numBlueParticles > 0) {
      while (numBlueAdded < numBlueParticles) {
        // First, choose an x and y position at random from the (i) and (ii) bounds.
        int x = randInt(-sideLen + 1, sideLen);
@@ -442,7 +471,11 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
          numBlueAdded++;
        }
    }
-   }
+     }
+      _measures.push_back(new PerimeterMeasure("Perimeter", 1, *this));
+
+      }
+
 
 bool CompressionSystem::hasTerminated() const {
   #ifdef QT_DEBUG
