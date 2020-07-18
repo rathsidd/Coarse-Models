@@ -118,8 +118,8 @@ void CompressionAlg::instantiate(const int numRedParticles, const int numBluePar
     if (numRedParticles <= 0) {
       emit log("# red particles must be > 0", true);
     }
-    if (numBlueParticles <= 0) {
-      emit log("# blue particles must be > 0", true);
+    if (numBlueParticles < 0) {
+      emit log("# blue particles must be > 0 or = 0", true);
     }
     else if (lambda <= 0) {
       emit log("lambda must be > 0", true);
