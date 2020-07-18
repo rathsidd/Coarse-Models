@@ -30,6 +30,7 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   // Constructs a new particle system with fresh round, activation, and movement
   // counts.
   AmoebotSystem();
+  std::vector<Measure*> _measures;
 
   // Deletes the particles, objects, and metrics in this system before
   // destructing the system.
@@ -83,14 +84,14 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   // this JSON string can be found in the Usage documentation.
   const QString metricsAsJSON() const final;
 
- protected:
+// protected:
   std::vector<AmoebotParticle*> particles;
   std::map<Node, AmoebotParticle*> particleMap;
   std::set<AmoebotParticle*> activatedParticles;
   std::deque<Object*> objects;
   std::map<Node, Object*> objectMap;
   std::vector<Count*> _counts;
-  std::vector<Measure*> _measures;
+//  std::vector<Measure*> _measures;
 };
 
 #endif  // AMOEBOTSIM_CORE_AMOEBOTSYSTEM_H_
