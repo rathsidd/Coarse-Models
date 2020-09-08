@@ -13,12 +13,16 @@
 #define AMOEBOTSIM_ALG_DEMO_DISCODEMO_H_
 
 #include <QString>
+#include <iostream>
+#include <vector>
 
 #include "core/amoebotparticle.h"
 #include "core/amoebotsystem.h"
 
 class DiscoDemoParticle : public AmoebotParticle {
+    friend class DiscoDemoSystem;
  public:
+    bool visited;
   enum class State {
     Red,
     Blue,
@@ -71,6 +75,22 @@ class DiscoDemoSystem : public AmoebotSystem {
   // Constructs a system of the specified number of DiscoDemoParticles enclosed
   // by a hexagonal ring of objects.
   DiscoDemoSystem(unsigned int numParticles = 30, int counterMax = 5);
+
+  //MichaelM Josh email advice (I think I followed correctly?
+  void DFS(DiscoDemoParticle& p, std::vector<DiscoDemoParticle> cluster);
+  std::vector<std::vector<DiscoDemoParticle>> getClusters();
+};
+
+ class ClusterMeasure : public Measure {
+     friend class DiscoDemoSystem;
+
+public:
+    ClusterMeasure(const QString name, const unsigned int freq, DiscoDemoSystem& system);
+
+    double calculate() const final;
+
+//protected:
+    DiscoDemoSystem& _system;
 };
 
 #endif  // AMOEBOTSIM_ALG_DEMO_DISCODEMO_H_
