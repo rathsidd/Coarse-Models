@@ -91,7 +91,6 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   std::deque<Object*> objects;
   std::map<Node, Object*> objectMap;
   std::vector<Count*> _counts;
-//  std::vector<Measure*> _measures;
 };
 
 #endif  // AMOEBOTSIM_CORE_AMOEBOTSYSTEM_H_
