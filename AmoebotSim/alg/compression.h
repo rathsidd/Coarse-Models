@@ -25,6 +25,16 @@ class CompressionParticle : public AmoebotParticle {
       Blue,
   };
 
+  enum class Direction {
+      a,
+      b,
+      c,
+      d,
+      e,
+      f,
+  };
+
+
  public:
   // Constructs a new particle with a node position for its head, a global
   // compass direction from its head to its tail (-1 if contracted), an offset
@@ -36,21 +46,26 @@ class CompressionParticle : public AmoebotParticle {
 
 
   // Executes one particle activation.
-  virtual void activate();
+  virtual void activate() override;
 
   // Returns the string to be displayed when this particle is inspected; used
   // to snapshot the current values of this particle's memory at runtime.
  // virtual QString inspectionText() const;
-    int headMarkColor() const; //MichaelM added head and tail colors, also removed "const override;" to "const;"
-    int tailMarkColor() const; //Not sure if this causes problems.
+    int headMarkColor() const override; //MichaelM added head and tail colors, also removed "const override;" to "const;"
+    int tailMarkColor() const override; //Not sure if this causes problems.
+      int headMarkDir() const override;
+      int tailMarkDir() const override;
 protected:
   // Particle memory.
   const double lambda;
   double q;
   int numRedNbrsBefore;
   int numBlueNbrsBefore;
+  int numRedNbrsSameDirBefore;
   bool flag;
   State _state;   //MichaelM added states (like in DiscoDemo)
+  int _direction; //MichaelM added directions
+//  Direction getRandDir() const;
 
   //Member variables:
      //MichaelM added states
@@ -66,10 +81,13 @@ private:
   // the position at the specified label.
   bool hasExpNbr() const;
   bool hasExpHeadAtLabel(const int label) const;
+  bool hasNbrInLine() const;
+  int almostInLine() const;
 
   // Counts the number of neighbors in the labeled positions. Note: this
   // implicitly assumes all neighbors are unique, as none are expanded.
   int redNbrCount(std::vector<int> labels) const;
+  int redNbrCountSameDir(std::vector<int> labels) const;
   int blueNbrCount(std::vector<int> labels) const;
 
   // Functions for checking Properties 1 and 2 of the compression algorithm.
