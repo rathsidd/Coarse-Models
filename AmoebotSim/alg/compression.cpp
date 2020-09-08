@@ -21,68 +21,151 @@ CompressionParticle::CompressionParticle(const Node head,
     q(0),
     numRedNbrsBefore(0),
     numBlueNbrsBefore(0),
+    numRedNbrsSameDirBefore(0),
     flag(false),
-    _state(state) {}
+    _state(state) {
+    _direction = rand() % 3;
+    }
+
+
 
 void CompressionParticle::activate() {
 
-    if (_state == State::Red) {
+//   if (_state == State::Red) {
+
+    double x = 1.0; //Diffusion Rate without neighbors. All values acceptable.
+    double y = 1.0; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
+    double z = 0; //Affinity to detach from cluster. Values less than .1 are acceptable.
+
 
        if (isContracted()) {
-           q = randDouble(0, 1);
-           int expandDir = randDir();
-    /*       if (q< 0.5) {
+int expandDir = randDir();
+q = randDouble(0, 1);
+
+/*           if (_direction == 0) {
+               if (q < 0.51) {
+               expandDir = 0;
+} else expandDir = 3;
+              } else if (_direction == 1) {
+               if (q < 0.51) {
+               expandDir = 1;
+} else expandDir = 4;
+               } else if (_direction == 2) {
+               if (q < 0.51) {
+               expandDir = 2;
+} else expandDir = 5;
+            } else if (_direction == 3) {
+               if (q < 0.51) {
                expandDir = 3;
-           } else {
-               expandDir = 3;
-           } */
+} else expandDir = 0;
+            } else if (_direction == 4) {
+               if (q < 0.51) {
+               expandDir = 4;
+} else expandDir = 1;
+            } else if (_direction == 5) {
+               if (q < 0.51) {
+               expandDir = 5;
+} else expandDir = 2;
+            } */
+
+if (hasNbrInLine()) {
+    z = 0;
+    q = 2;
+}
+
+/* if (!hasNbrInLine()) {
+if (q < 0.05 || q > 0.95) {
+    expandDir = randDir();
+}
+} */
+
+if (redNbrCountSameDir(uniqueLabels()) == 1) {
+    for (int dir = 0; dir < 6; ++dir) {
+
+        if (hasNbrAtLabel(dir) && nbrAtLabel(dir)._direction == _direction) {
+                if (dir < 5 && dir > 0) {
+                    if (q < 0.51) {
+            expandDir = dir + 1;
+            } else {
+                        expandDir = dir - 1;
+                    }
+}
+        if  (dir == 5) {
+           if (q < 0.51) {
+             expandDir = 0;
+             } else {
+                    expandDir = 4;
+                      }
+
+}
+    if (dir == 0) {
+     if (q < 0.51) {
+        expandDir = 1;
+          } else {
+                expandDir = 5;
+              }
+
+}
+}
+}
+}
+
 
        if (canExpand(expandDir) && !hasExpNbr()) {
       // Count neighbors in original position and expand.
       numRedNbrsBefore = redNbrCount(uniqueLabels());
+      numRedNbrsSameDirBefore = redNbrCountSameDir(uniqueLabels());
       expand(expandDir);
+      if (q == 2) {
+         contractHead();
+      }
       flag = !hasExpNbr();
     }
+       }   else {  // isExpanded().
+ //    int numRedNbrsAfter = redNbrCount(headLabels());
+     int numRedNbrsSameDirAfter = redNbrCountSameDir(headLabels());
 
-  } else {  // isExpanded().
-     int numRedNbrsAfter = redNbrCount(headLabels());
-     double x = 1; //Diffusion Rate without neighbors. All values acceptable.
-     double y = 0.9; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
-     double z = 0.02; //Affinity to detach from cluster. Values less than .1 are acceptable.
-
-     if (!flag || numRedNbrsBefore == 5) {
+     if (!flag || numRedNbrsSameDirBefore == 5) {
 contractHead();
 }
-        else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q < x) { //Diffusion rate
+
+        else if (numRedNbrsSameDirAfter == 0 && numRedNbrsSameDirBefore == 0 && q < x) { //Diffusion rate
              contractTail();
          }
-     else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q > x) {
+     else if (numRedNbrsSameDirAfter == 0 && numRedNbrsSameDirBefore == 0 && q > x) {
          contractHead();
      }
 
-     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q < y) {
+     else if (numRedNbrsSameDirAfter != 0 && numRedNbrsSameDirBefore == 0 && q < y) {
          contractTail();
      }
-     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q > y) {
+     else if (numRedNbrsSameDirAfter != 0 && numRedNbrsSameDirBefore == 0 && q > y) {
          contractHead();
      }
+     else if (numRedNbrsSameDirAfter == 1) {
+         contractTail();
+     }
+
+
+
     else {
       // Count neighbors in new position and compute the set S.
 //      int numRedNbrsAfter = redNbrCount(headLabels());
       std::vector<int> S;
       for (const int label : {headLabels()[4], tailLabels()[4]}) {
-        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._direction == _direction) {
           S.push_back(label);
         }
       }
 
       if (q < z) {
           contractTail();
-      }
+     }
 
       // If the conditions are satisfied, contract to the new position;
       // otherwise, contract back to the original one.
-      else if ((q < pow(lambda, numRedNbrsAfter - numRedNbrsBefore))
+
+         else if ((q < pow(lambda, numRedNbrsSameDirAfter - numRedNbrsSameDirBefore))
           && (checkRedProp1(S) || checkRedProp2(S))) {
         contractTail();
       }  else {
@@ -126,6 +209,23 @@ contractHead();
             }
           }
     } */
+
+if (system.getCount("# Activations")._value < 4000000) {
+  if (system.getCount("# Activations")._value % 500 == 0) {
+        int sideLen = static_cast<int>(std::round(30));
+
+        int x = randInt(-sideLen + 1, sideLen);
+        int y = randInt(1, 2 * sideLen);
+        Node node(x, y);
+
+        // If the node satisfies (iii) and is unoccupied, place a particle there.
+        if (0 < x + y && x + y < 2 * sideLen
+            && system.particleMap.find(node) == system.particleMap.end()) {
+            //if (DiscoDemoSystem::getClusters() > 1) {
+          system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+  }
+
+    }
 }
 }
 
@@ -140,8 +240,16 @@ int CompressionParticle::headMarkColor() const {
   return -1;
 }
 
+ int CompressionParticle::headMarkDir() const {
+    return _direction;
+}
+
    int CompressionParticle::tailMarkColor() const {
      return headMarkColor();
+   }
+
+   int CompressionParticle::tailMarkDir() const {
+       return _direction;
    }
 
 /* QString CompressionParticle::inspectionText() const {
@@ -184,6 +292,140 @@ bool CompressionParticle::hasExpNbr() const {
 
   return false;
 }
+bool CompressionParticle::hasNbrInLine() const {
+
+    if (_direction == 0) {
+    if (hasNbrAtLabel(0)) {
+        if (nbrAtLabel(0)._direction == 0) {
+            return true;
+        }
+    }
+
+     if (hasNbrAtLabel(3)) {
+        if (nbrAtLabel(3)._direction == 0) {
+                    return true;
+                }
+    }
+}
+
+     if (_direction == 1) {
+    if (hasNbrAtLabel(1)) {
+        if (nbrAtLabel(1)._direction == 1) {
+            return true;
+        }
+    }
+
+     if (hasNbrAtLabel(4)) {
+        if (nbrAtLabel(4)._direction == 1) {
+                    return true;
+                }
+    }
+}
+
+    if (_direction == 2) {
+    if (hasNbrAtLabel(2)) {
+        if (nbrAtLabel(2)._direction == 2) {
+            return true;
+        }
+    }
+
+     if (hasNbrAtLabel(5)) {
+        if (nbrAtLabel(5)._direction == 2) {
+                    return true;
+                }
+    }
+}
+    return false;
+}
+
+/* int CompressionParticle::almostInLine() const {
+    //bool hasOneAdjNbrSameDir = false;
+
+    if (redNbrCountSameDir(uniqueLabels()) == 1) {
+
+    }
+
+} */
+
+
+
+
+
+
+/*    if (_direction == 0) {
+    if (hasNbrAtLabel(0) || hasNbrAtLabel(3)) {
+        if (nbrAtLabel(0)._direction == 0 || nbrAtLabel(3)._direction == 0) {
+            return true;
+        } else {return false;}
+    }
+    else {return false;}
+} else {
+    return false;
+}
+} */
+
+
+
+
+
+
+ //   if (hasNbrAtLabel(_direction) && nbrAtLabel(_direction)._direction == _direction) {
+//        return true;
+ //   }
+
+
+//    for (int dir = 0; dir < 6; dir++) {
+//      if (hasNbrAtLabel(dir) && dir == _direction && nbrAtLabel(dir)._direction == _direction) {
+
+//}
+//}
+
+
+
+
+
+
+/*    for (int label : uniqueLabels()) {
+        if (hasNbrAtLabel(label) && nbrAtLabel(label)._direction == _direction && pointsAtMe(nbrAtLabel(label), nbrAtLabel(label)._direction)) {
+            return true;
+        }
+    }
+    return false;
+} */
+
+
+
+    //    int numRedNbrsWithSameDir = 0;
+ /*   if (_direction == 0) {
+        if (hasNbrAtLabel(0) || hasNbrAtLabel(3)) {
+            if (nbrAtLabel(0)._direction == 0 || nbrAtLabel(0)._direction == 3 || nbrAtLabel(3)._direction == 0 || nbrAtLabel(3)._direction == 3) {
+                return true;
+            }
+        }
+    } else if (_direction == 1) {
+        if (hasNbrAtLabel(1) || hasNbrAtLabel(4)) {
+            if (nbrAtLabel(1)._direction == 1 || nbrAtLabel(1)._direction == 4 || nbrAtLabel(4)._direction == 1 || nbrAtLabel(4)._direction == 4) {
+                return true;
+            }
+        }
+    } else if (_direction == 2) {
+        if (hasNbrAtLabel(2) || hasNbrAtLabel(5)) {
+            if (nbrAtLabel(2)._direction == 2 || nbrAtLabel(2)._direction == 5 || nbrAtLabel(5)._direction == 2 || nbrAtLabel(5)._direction == 5) {
+                return true;
+            }
+        }
+    }
+     return false; */
+
+//}
+
+/* int CompressionParticle::hasAdjNbrWithSameDir() const {
+    for (const int label: uniqueLabels()) {
+        if (hasNbrAtLabel(label) && nbrAtLabel(label)._direction == _direction) {
+          int expandDir = ++label;
+        }
+    }
+} */
 
 bool CompressionParticle::hasExpHeadAtLabel(const int label) const {
   return hasNbrAtLabel(label) && nbrAtLabel(label).isExpanded()
@@ -200,6 +442,18 @@ int CompressionParticle::redNbrCount(std::vector<int> labels) const {
 
   return numRedNbrs;
 }
+
+ int CompressionParticle::redNbrCountSameDir(std::vector<int> labels) const {
+  int numRedNbrsSameDir = 0;
+  for (const int label : labels) {
+    if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._direction == _direction) {
+      ++numRedNbrsSameDir;
+    }
+  }
+
+  return numRedNbrsSameDir;
+}
+
 
 int CompressionParticle::blueNbrCount(std::vector<int> labels) const {
   int numBlueNbrs = 0;
@@ -237,7 +491,7 @@ if (_state == State::Red) { //MichaelM only Red particles follow compression alg
       // expanded head is encountered.
       for (uint offset = 1; offset < labels.size(); ++offset) {
         int label = labels[(i + offset) % labels.size()];
-        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red && nbrAtLabel(label)._direction == _direction) {
           redAdjNbrs.insert(label);
         } else {
           break;
@@ -247,7 +501,7 @@ if (_state == State::Red) { //MichaelM only Red particles follow compression alg
       // Then sweep clockwise.
       for (uint offset = 1; offset < labels.size(); ++offset) {
         int label = labels[(i - offset + labels.size()) % labels.size()];
-        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red && nbrAtLabel(label)._direction == _direction) {
           redAdjNbrs.insert(label);
         } else {
           break;
@@ -258,7 +512,7 @@ if (_state == State::Red) { //MichaelM only Red particles follow compression alg
     // If all neighbors are connected to a particle in S by a path through the
     // neighborhood, then the number of labels in adjNbrs should equal the total
     // number of neighbors.
-    return redAdjNbrs.size() == (uint)redNbrCount(labels); //MichaelM originally was just "nbrCount"
+    return redAdjNbrs.size() == (uint)redNbrCountSameDir(labels); //MichaelM originally was just "nbrCount"
   }
 }
 }
@@ -327,28 +581,28 @@ bool CompressionParticle::checkRedProp2(std::vector<int> S) const {
   if (S.size() != 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster                           // S has to be empty for Property 2.
     return false;  //MichaelM changed "return false" to "return true"
   } else {
-    const int numRedHeadNbrs = redNbrCount(headLabels());
-    const int numRedTailNbrs = redNbrCount(tailLabels());
+    const int numRedHeadNbrsSameDir = redNbrCountSameDir(headLabels());
+    const int numRedTailNbrsSameDir = redNbrCountSameDir(tailLabels());
 
     // Check if the head's neighbors are connected.
-    int numRedAdjHeadNbrs = 0;
+    int numRedAdjHeadNbrsSameDir = 0;
     bool seenNbr = false;
     for (const int label : headLabels()) {
-      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red && nbrAtLabel(label)._direction == _direction) {
         seenNbr = true;
-        ++numRedAdjHeadNbrs;
+        ++numRedAdjHeadNbrsSameDir;
       } else if (seenNbr) {
         break;
       }
     }
 
     // Check if the tail's neighbors are connected.
-    int numRedAdjTailNbrs = 0;
+    int numRedAdjTailNbrsSameDir = 0;
     seenNbr = false;
     for (const int label : tailLabels()) {
-      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red && nbrAtLabel(label)._direction == _direction) {
         seenNbr = true;
-        ++numRedAdjTailNbrs;
+        ++numRedAdjTailNbrsSameDir;
       } else if (seenNbr) {
         break;
       }
@@ -356,8 +610,8 @@ bool CompressionParticle::checkRedProp2(std::vector<int> S) const {
 
     // Property 2 is satisfied if both the head and tail have at least one
     // neighbor and all head (tail) neighbors are connected.
-    return (numRedHeadNbrs > 0) && (numRedTailNbrs > 0) &&
-           (numRedHeadNbrs == numRedAdjHeadNbrs) && (numRedTailNbrs == numRedAdjTailNbrs);
+    return (numRedHeadNbrsSameDir > 0) && (numRedTailNbrsSameDir > 0) &&
+           (numRedHeadNbrsSameDir == numRedAdjHeadNbrsSameDir) && (numRedTailNbrsSameDir == numRedAdjTailNbrsSameDir);
   }
 }
 }
@@ -423,7 +677,7 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
 
   //  int numParticles = numBlueParticles + numRedParticles;
     //MichaelM added hexagon creation and random particle insertion similar to DiscoDemo but for CompressionParticles
-    int sideLen = static_cast<int>(std::round(20)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
+    int sideLen = static_cast<int>(std::round(30)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
      Node boundNode(0, 0);                                                     //perhaps make this a variable? to easily modify?
      for (int dir = 0; dir < 6; ++dir) {
        for (int i = 0; i < sideLen; ++i) {
@@ -449,7 +703,7 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
        // If the node satisfies (iii) and is unoccupied, place a particle there.
        if (0 < x + y && x + y < 2 * sideLen
            && occupied.find(node) == occupied.end()) {
-         insert(new CompressionParticle(node, -1, randDir(), *this, lambda, CompressionParticle::State::Red));
+         insert(new CompressionParticle(node, -1, 0, *this, lambda, CompressionParticle::State::Red));
          occupied.insert(node);
          numRedAdded++;
        }
@@ -473,7 +727,6 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
    }
      }
       _measures.push_back(new PerimeterMeasure("Perimeter", 1, *this));
-
       }
 
 
@@ -509,3 +762,211 @@ double PerimeterMeasure::calculate() const {
   return (3 * _system.size()) - (numEdges / 2) - 3;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//OLD COMPRESSION CODE FOR FORCED LINEAR FORMATION
+/*   if (_state == State::Red) {
+       if (isContracted()) {
+
+           q = randDouble(0, 1);
+           int expandDir = randDir();
+          if (q< 0.5) {
+               expandDir = 3;
+           } else {
+               expandDir = 3;
+           }
+
+if (system.getCount("# Activations")._value < (pow(99, 99999999999999999))) {
+       if (canExpand(expandDir) && !hasExpNbr()) {
+      // Count neighbors in original position and expand.
+      numRedNbrsBefore = redNbrCount(uniqueLabels());
+      expand(expandDir);
+      flag = !hasExpNbr();
+    }
+}
+      else {
+   if (q < 0.00) {
+        if (canExpand(expandDir) && !hasExpNbr()) {
+              // Count neighbors in original position and expand.
+              numRedNbrsBefore = redNbrCount(uniqueLabels());
+              expand(expandDir);
+              flag = !hasExpNbr();
+            }
+   }
+        else {
+        if (CompressionParticle::head.y % 5 == 0) {
+          if (canExpand(expandDir) && !hasExpNbr() && (localToGlobalDir(expandDir) == 0 || localToGlobalDir(expandDir) == 3)) {
+              numRedNbrsBefore = redNbrCount(uniqueLabels());
+              expand(expandDir);
+              flag = !hasExpNbr();
+          }
+    }
+        else if (CompressionParticle::head.x % 5 == 0) {
+            if (canExpand(expandDir) && !hasExpNbr() && (localToGlobalDir(expandDir) == 2 || localToGlobalDir(expandDir) == 5)) {
+                numRedNbrsBefore = redNbrCount(uniqueLabels());
+                expand(expandDir);
+                flag = !hasExpNbr();
+            }
+        }
+
+
+
+        else if (CompressionParticle::head.x % 5 == 0) {
+            if (canExpand(expandDir) && !hasExpNbr() && (localToGlobalDir(expandDir) == 1 || localToGlobalDir(expandDir) == 4)) {
+                numRedNbrsBefore = redNbrCount(uniqueLabels());
+                expand(expandDir);
+                flag = !hasExpNbr();
+            }
+        }
+        else if (CompressionParticle::head.x == (CompressionParticle::head.y * (-1))) {
+            if (canExpand(expandDir) && !hasExpNbr() && (localToGlobalDir(expandDir) == 2 || localToGlobalDir(expandDir) == 5)) {
+                numRedNbrsBefore = redNbrCount(uniqueLabels());
+                expand(expandDir);
+                flag = !hasExpNbr();
+            }
+        }
+        else {
+            if (canExpand(expandDir) && !hasExpNbr()) {
+                  // Count neighbors in original position and expand.
+                  numRedNbrsBefore = redNbrCount(uniqueLabels());
+                  expand(expandDir);
+                  flag = !hasExpNbr();
+                }
+        }
+       }
+}
+
+       }   else {  // isExpanded().
+     int numRedNbrsAfter = redNbrCount(headLabels());
+     double x = 1.0; //Diffusion Rate without neighbors. All values acceptable.
+     double y = 0.7; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
+     double z = 0.02; //Affinity to detach from cluster. Values less than .1 are acceptable.
+
+     if (!flag || numRedNbrsBefore == 5) {
+contractHead();
+}
+        else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q < x) { //Diffusion rate
+             contractTail();
+         }
+     else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q > x) {
+         contractHead();
+     }
+
+     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q < y) {
+         contractTail();
+     }
+     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q > y) {
+         contractHead();
+     }
+    else {
+      // Count neighbors in new position and compute the set S.
+//      int numRedNbrsAfter = redNbrCount(headLabels());
+      std::vector<int> S;
+      for (const int label : {headLabels()[4], tailLabels()[4]}) {
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
+          S.push_back(label);
+        }
+      }
+
+      if (q < z) {
+          contractTail();
+      }
+
+      // If the conditions are satisfied, contract to the new position;
+      // otherwise, contract back to the original one.
+      else if ((q < pow(lambda, numRedNbrsAfter - numRedNbrsBefore))
+          && (checkRedProp1(S) || checkRedProp2(S))) {
+        contractTail();
+      }  else {
+        contractHead();
+      }
+    }
+  }
+   else if (_state == State::Blue) {
+        if (isContracted()) {
+            int expandDir = randDir();  // Select a random neighboring location.
+            q = randDouble(0, 1);        // Select a random q in (0,1).
+
+            if (canExpand(expandDir) && !hasExpNbr()) {
+              // Count neighbors in original position and expand.
+
+                numBlueNbrsBefore = blueNbrCount(uniqueLabels());
+                expand(expandDir);
+                flag = !hasExpNbr();
+            }
+        } else {  // isExpanded().
+            if (!flag || numBlueNbrsBefore == 5) {
+              contractHead();
+            } else {
+              // Count neighbors in new position and compute the set S.
+              int numBlueNbrsAfter = blueNbrCount(headLabels());
+              std::vector<int> S;
+              for (const int label : {headLabels()[4], tailLabels()[4]}) {
+                if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
+                  S.push_back(label);
+                } //MichaelM: DONT UNDERSTAND WHAT ABOVE 3 LINES DO? MAY CAUSE PROBLEMS!
+              }
+
+              // If the conditions are satisfied, contract to the new position;
+              // otherwise, contract back to the original one.
+              if ((q < pow(lambda, numBlueNbrsAfter - numBlueNbrsBefore))
+                  && (checkBlueProp1(S) || checkBlueProp2(S))) {
+                contractTail();
+              } else {
+                contractHead();
+              }
+            }
+          }
+    }
+}
+
+   if (system.getCount("# Activations")._value % 50 == 0) {
+        int sideLen = static_cast<int>(std::round(2 * std::sqrt(5)));
+
+        int x = randInt(-sideLen + 1, sideLen);
+        int y = randInt(1, 2 * sideLen);
+        Node node(x, y);
+
+        // If the node satisfies (iii) and is unoccupied, place a particle there.
+        if (0 < x + y && x + y < 2 * sideLen
+            && system.particleMap.find(node) == system.particleMap.end()) {
+            //if (DiscoDemoSystem::getClusters() > 1) {
+          system.insert(new CompressionParticle(node, -1, randDir(), system, lambda, CompressionParticle::State::Red));
+  }
+
+    }
+} */
