@@ -83,6 +83,8 @@ private:
   bool hasExpHeadAtLabel(const int label) const;
   bool hasNbrInLine() const;
   int almostInLine() const;
+  bool atEndOfLine() const;
+  bool stuckInLine() const;
 
   // Counts the number of neighbors in the labeled positions. Note: this
   // implicitly assumes all neighbors are unique, as none are expanded.
