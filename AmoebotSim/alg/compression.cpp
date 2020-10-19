@@ -33,14 +33,32 @@ void CompressionParticle::activate() {
 
 //   if (_state == State::Red) {
 
-    double x = 1.0; //Diffusion Rate without neighbors. All values acceptable.
-    double y = 1.0; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
-    double z = 0; //Affinity to detach from cluster. Values less than .1 are acceptable.
+/*    if (hasNbrInLine()) {
+        _state = State::Blue;
+    }
 
+    if (!hasNbrInLine()) {
+        _state = State::Red;
+    } */
+
+/*    if (atEndOfLine()) {
+        _state = State::Blue;
+    }
+
+    if (!atEndOfLine()) {
+        _state = State::Red;
+    } */
+
+
+    double x = 1.0; //Diffusion Rate without neighbors. All values acceptable.
+    double y = 0.5; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
+    double z = 0.5; //Affinity to detach from cluster. Values less than .1 are acceptable.
+//    double q2 = 0;
 
        if (isContracted()) {
 int expandDir = randDir();
 q = randDouble(0, 1);
+
 
 /*           if (_direction == 0) {
                if (q < 0.51) {
@@ -68,9 +86,18 @@ q = randDouble(0, 1);
 } else expandDir = 2;
             } */
 
-if (hasNbrInLine()) {
-    z = 0;
+if (hasNbrInLine() && stuckInLine()) {
+    z = 0.00;
     q = 2;
+}
+
+if (hasNbrInLine() && !stuckInLine()) {
+    q = randDouble(1, 2);
+    z = 0.00;
+}
+
+if (!hasNbrInLine() && q < 0.5) { //Left out "&& redNbrCount(uniqueLabels()) == 0"
+    _direction = rand() % 3;
 }
 
 /* if (!hasNbrInLine()) {
@@ -116,30 +143,43 @@ if (redNbrCountSameDir(uniqueLabels()) == 1) {
       numRedNbrsBefore = redNbrCount(uniqueLabels());
       numRedNbrsSameDirBefore = redNbrCountSameDir(uniqueLabels());
       expand(expandDir);
-      if (q == 2) {
-         contractHead();
+
+//      if (q == 2) {
+  //           contractHead();
+//}
+      if (q > 1.1) {
+          contractHead();
       }
+/*      if (q > 1 && q < 1.01) {
+          contractTail();
+      }
+
+      if (q > 1 && 1 > 1.01) {
+          contractHead();
+      } */
+
+
       flag = !hasExpNbr();
     }
        }   else {  // isExpanded().
- //    int numRedNbrsAfter = redNbrCount(headLabels());
+     int numRedNbrsAfter = redNbrCount(headLabels());
      int numRedNbrsSameDirAfter = redNbrCountSameDir(headLabels());
 
      if (!flag || numRedNbrsSameDirBefore == 5) {
 contractHead();
 }
 
-        else if (numRedNbrsSameDirAfter == 0 && numRedNbrsSameDirBefore == 0 && q < x) { //Diffusion rate
+        else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q < x) { //Diffusion rate
              contractTail();
          }
-     else if (numRedNbrsSameDirAfter == 0 && numRedNbrsSameDirBefore == 0 && q > x) {
+     else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q > x) {
          contractHead();
      }
 
-     else if (numRedNbrsSameDirAfter != 0 && numRedNbrsSameDirBefore == 0 && q < y) {
+     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q < y) {
          contractTail();
      }
-     else if (numRedNbrsSameDirAfter != 0 && numRedNbrsSameDirBefore == 0 && q > y) {
+     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q > y) {
          contractHead();
      }
      else if (numRedNbrsSameDirAfter == 1) {
@@ -153,7 +193,7 @@ contractHead();
 //      int numRedNbrsAfter = redNbrCount(headLabels());
       std::vector<int> S;
       for (const int label : {headLabels()[4], tailLabels()[4]}) {
-        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._direction == _direction) {
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) { //Left out "&& nbrAtLabel(label)._direction == _direction"
           S.push_back(label);
         }
       }
@@ -165,7 +205,7 @@ contractHead();
       // If the conditions are satisfied, contract to the new position;
       // otherwise, contract back to the original one.
 
-         else if ((q < pow(lambda, numRedNbrsSameDirAfter - numRedNbrsSameDirBefore))
+         else if ((q < pow(lambda, numRedNbrsAfter - numRedNbrsBefore))
           && (checkRedProp1(S) || checkRedProp2(S))) {
         contractTail();
       }  else {
@@ -211,7 +251,7 @@ contractHead();
     } */
 
 if (system.getCount("# Activations")._value < 4000000) {
-  if (system.getCount("# Activations")._value % 500 == 0) {
+  if (system.getCount("# Activations")._value % 400000 == 0) {
         int sideLen = static_cast<int>(std::round(30));
 
         int x = randInt(-sideLen + 1, sideLen);
@@ -427,6 +467,43 @@ bool CompressionParticle::hasNbrInLine() const {
     }
 } */
 
+/* bool CompressionParticle::atEndOfLine() const {
+    if (hasNbrInLine() && redNbrCountSameDir(uniqueLabels()) == 1) {
+        return true;
+    }
+    else { return false; }
+} */
+
+bool CompressionParticle::stuckInLine() const {
+
+    if (_direction == 0) {
+    if (hasNbrAtLabel(0) && hasNbrAtLabel(3)) {
+        if (nbrAtLabel(0)._direction == 0 && nbrAtLabel(3)._direction == 0) {
+            return true;
+        }
+    }
+}
+
+    if (_direction == 1) {
+    if (hasNbrAtLabel(1) && hasNbrAtLabel(4)) {
+        if (nbrAtLabel(1)._direction == 1 && nbrAtLabel(4)._direction == 1) {
+            return true;
+        }
+    }
+}
+
+    if (_direction == 2) {
+    if (hasNbrAtLabel(2) && hasNbrAtLabel(5)) {
+        if (nbrAtLabel(2)._direction == 2 && nbrAtLabel(5)._direction == 2) {
+            return true;
+        }
+    }
+}
+
+    return false;
+}
+
+
 bool CompressionParticle::hasExpHeadAtLabel(const int label) const {
   return hasNbrAtLabel(label) && nbrAtLabel(label).isExpanded()
          && nbrAtLabel(label).pointsAtMyHead(*this, label);
@@ -491,7 +568,7 @@ if (_state == State::Red) { //MichaelM only Red particles follow compression alg
       // expanded head is encountered.
       for (uint offset = 1; offset < labels.size(); ++offset) {
         int label = labels[(i + offset) % labels.size()];
-        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red && nbrAtLabel(label)._direction == _direction) {
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) { //Left out "&& nbrAtLabel(label)._direction == _direction"
           redAdjNbrs.insert(label);
         } else {
           break;
@@ -501,7 +578,7 @@ if (_state == State::Red) { //MichaelM only Red particles follow compression alg
       // Then sweep clockwise.
       for (uint offset = 1; offset < labels.size(); ++offset) {
         int label = labels[(i - offset + labels.size()) % labels.size()];
-        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red && nbrAtLabel(label)._direction == _direction) {
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) { //Left out "&& nbrAtLabel(label)._direction == _direction"
           redAdjNbrs.insert(label);
         } else {
           break;
@@ -512,7 +589,7 @@ if (_state == State::Red) { //MichaelM only Red particles follow compression alg
     // If all neighbors are connected to a particle in S by a path through the
     // neighborhood, then the number of labels in adjNbrs should equal the total
     // number of neighbors.
-    return redAdjNbrs.size() == (uint)redNbrCountSameDir(labels); //MichaelM originally was just "nbrCount"
+    return redAdjNbrs.size() == (uint)redNbrCount(labels); //MichaelM originally was just "nbrCount"
   }
 }
 }
@@ -581,28 +658,30 @@ bool CompressionParticle::checkRedProp2(std::vector<int> S) const {
   if (S.size() != 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster                           // S has to be empty for Property 2.
     return false;  //MichaelM changed "return false" to "return true"
   } else {
-    const int numRedHeadNbrsSameDir = redNbrCountSameDir(headLabels());
-    const int numRedTailNbrsSameDir = redNbrCountSameDir(tailLabels());
+//    const int numRedHeadNbrsSameDir = redNbrCountSameDir(headLabels());
+//    const int numRedTailNbrsSameDir = redNbrCountSameDir(tailLabels());
+    const int numRedHeadNbrs = redNbrCount(headLabels());
+    const int numRedTailNbrs = redNbrCount(tailLabels());
 
     // Check if the head's neighbors are connected.
-    int numRedAdjHeadNbrsSameDir = 0;
+    int numRedAdjHeadNbrs = 0;
     bool seenNbr = false;
     for (const int label : headLabels()) {
-      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red && nbrAtLabel(label)._direction == _direction) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) { //Left out "&& nbrAtLabel(label)._direction == _direction"
         seenNbr = true;
-        ++numRedAdjHeadNbrsSameDir;
+        ++numRedAdjHeadNbrs;
       } else if (seenNbr) {
         break;
       }
     }
 
     // Check if the tail's neighbors are connected.
-    int numRedAdjTailNbrsSameDir = 0;
+    int numRedAdjTailNbrs = 0;
     seenNbr = false;
     for (const int label : tailLabels()) {
-      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red && nbrAtLabel(label)._direction == _direction) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._state == State::Red) {
         seenNbr = true;
-        ++numRedAdjTailNbrsSameDir;
+        ++numRedAdjTailNbrs;
       } else if (seenNbr) {
         break;
       }
@@ -610,8 +689,8 @@ bool CompressionParticle::checkRedProp2(std::vector<int> S) const {
 
     // Property 2 is satisfied if both the head and tail have at least one
     // neighbor and all head (tail) neighbors are connected.
-    return (numRedHeadNbrsSameDir > 0) && (numRedTailNbrsSameDir > 0) &&
-           (numRedHeadNbrsSameDir == numRedAdjHeadNbrsSameDir) && (numRedTailNbrsSameDir == numRedAdjTailNbrsSameDir);
+    return (numRedHeadNbrs > 0) && (numRedTailNbrs > 0) &&
+           (numRedHeadNbrs == numRedAdjHeadNbrs) && (numRedTailNbrs == numRedAdjTailNbrs);
   }
 }
 }
