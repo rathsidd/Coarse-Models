@@ -50,7 +50,7 @@ class ShapeFormationParticle : public AmoebotParticle {
   // when the particle is contracted. headMarkDir returns the label of the port
   // on which the black head marker is drawn.
   virtual int headMarkColor() const;
-  virtual int headMarkDir() const;
+  virtual double headMarkDir() const;
   virtual int tailMarkColor() const;
 
   // Returns the string to be displayed when this particle is inspected; used

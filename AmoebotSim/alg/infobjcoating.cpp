@@ -107,7 +107,7 @@ int InfObjCoatingParticle::headMarkColor() const {
   return -1;
 }
 
-int InfObjCoatingParticle::headMarkDir() const {
+double InfObjCoatingParticle::headMarkDir() const {
   return (state == State::Leader || state == State::Follower) ? moveDir : -1;
 }
 

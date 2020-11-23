@@ -41,7 +41,7 @@ class InfObjCoatingParticle : public AmoebotParticle {
   // when the particle is contracted. headMarkDir returns the label of the port
   // on which the black head marker is drawn.
   int headMarkColor() const override;
-  int headMarkDir() const override;
+  double headMarkDir() const override;
   int tailMarkColor() const override;
 
   // Returns the string to be displayed when this particle is inspected; used

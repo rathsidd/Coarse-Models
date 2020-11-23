@@ -12,20 +12,20 @@ AmoebotParticle::AmoebotParticle(const Node& head, int globalTailDir,
 AmoebotParticle::~AmoebotParticle() {}
 
 int AmoebotParticle::headMarkGlobalDir() const {
-  const int dir = headMarkDir();
+  const double dir = headMarkDir();
   Q_ASSERT(-1 <= dir && dir < 6);
 
   return (dir == -1) ? -1 : localToGlobalDir(dir);
 }
 
 int AmoebotParticle::tailMarkGlobalDir() const {
-  const int dir = tailMarkDir();
+  const double dir = tailMarkDir();
   Q_ASSERT(-1 <= dir && dir < 6);
 
   return (dir == -1) ? -1 : localToGlobalDir(dir);
 }
 
-int AmoebotParticle::headMarkDir() const {
+double AmoebotParticle::headMarkDir() const {
   return -1;
 }
 

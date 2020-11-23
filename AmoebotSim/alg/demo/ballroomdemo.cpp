@@ -73,7 +73,7 @@ int BallroomDemoParticle::headMarkColor() const {
   return -1;
 }
 
-int BallroomDemoParticle::headMarkDir() const {
+double BallroomDemoParticle::headMarkDir() const {
   return _partnerLbl;
 }
 

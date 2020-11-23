@@ -48,7 +48,7 @@ class BallroomDemoParticle : public AmoebotParticle {
   // on which the head marker is drawn; in this demo, this points from the
   // follower dance partner to its leader.
   int headMarkColor() const override;
-  int headMarkDir() const override;
+  double headMarkDir() const override;
   int tailMarkColor() const override;
 
   // Returns the string to be displayed when this particle is inspected; used

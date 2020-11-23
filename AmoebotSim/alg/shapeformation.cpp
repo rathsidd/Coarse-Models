@@ -93,7 +93,7 @@ int ShapeFormationParticle::headMarkColor() const {
   return -1;
 }
 
-int ShapeFormationParticle::headMarkDir() const {
+double ShapeFormationParticle::headMarkDir() const {
   if (state == State::Seed || state == State::Finish) {
     return constructionDir;
   } else if (state == State::Lead) {

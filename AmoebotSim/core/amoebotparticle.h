@@ -49,7 +49,7 @@ class AmoebotParticle : public LocalParticle, public RandomNumberGenerator {
   // Returns the local directions from the head (respectively, tail) on which to
   // draw the direction markers. Intended to be overridden by particle
   // subclasses, as the default implementations return -1 (no markers).
-  virtual int headMarkDir() const;
+  virtual double headMarkDir() const;
   virtual int tailMarkDir() const;
 
   // Functions for expansion. canExpand checks if this particle can expand in
