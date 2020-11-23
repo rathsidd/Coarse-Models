@@ -19,8 +19,10 @@ CompressionParticle::CompressionParticle(const Node head,
   : AmoebotParticle(head, globalTailDir, orientation, system),
     lambda(lambda),
     q(0),
+    numNbrsBefore(0),
     numRedNbrsBefore(0),
     numBlueNbrsBefore(0),
+    numNbrsSameDirBefore(0),
     numRedNbrsSameDirBefore(0),
     flag(false),
     _state(state) {
@@ -51,13 +53,17 @@ void CompressionParticle::activate() {
 
 
     double x = 1.0; //Diffusion Rate without neighbors. All values acceptable.
-    double y = 0.5; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
-    double z = 0.5; //Affinity to detach from cluster. Values less than .1 are acceptable.
+    double y = 0.2; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
+    double z = 0.8; //Affinity to detach from cluster. Values less than .1 are acceptable.
 //    double q2 = 0;
 
        if (isContracted()) {
-int expandDir = randDir();
+int expandDir = randDir();      //Store a potential direction to expand into (for use later)
 q = randDouble(0, 1);
+
+if (hasNbrInLine() && q < 0.0015) {     //If it is in a line with another particle, decide if it will turn blue or not.
+    _state = State::Blue;
+}
 
 
 /*           if (_direction == 0) {
@@ -86,17 +92,25 @@ q = randDouble(0, 1);
 } else expandDir = 2;
             } */
 
-if (hasNbrInLine() && stuckInLine()) {
-    z = 0.00;
+if (!hasNbrInLine() && !stuckInLine()) {    //If by itself, turn back to red to move freely
+    _state = State::Red;
+}
+
+if (hasNbrInLine() && stuckInLine() && q > 0.0015) {    //If it is sandwiched in a line but q is above the "convert to blue value" then do not break free
+    z = 0.00;                                           //Choose q so that if it does expand, it will automatically contract head (for use later)
     q = 2;
-}
+   } else if (hasNbrInLine() && q < 0.0015) {           //Decide again if it will convert to blue (but this time if its stuck in line, too, not just at the end)
+        z = 0.00;
+        q = 2;
+        _state = State::Blue;
+    }
 
-if (hasNbrInLine() && !stuckInLine()) {
-    q = randDouble(1, 2);
+if (hasNbrInLine() && !stuckInLine()) {                 //If it is at the end of a line, pick q value so that once it expands it will contract back to be at the front of the line
+    q = randDouble(1, 2);                               //Should this be random chance? IMPORTANT
     z = 0.00;
 }
 
-if (!hasNbrInLine() && q < 0.5) { //Left out "&& redNbrCount(uniqueLabels()) == 0"
+if (!hasNbrInLine() && q < 1) { //Left out "&& redNbrCount(uniqueLabels()) == 0"
     _direction = rand() % 3;
 }
 
@@ -106,7 +120,7 @@ if (q < 0.05 || q > 0.95) {
 }
 } */
 
-if (redNbrCountSameDir(uniqueLabels()) == 1) {
+/* if (nbrCountSameDir(uniqueLabels()) == 1) {
     for (int dir = 0; dir < 6; ++dir) {
 
         if (hasNbrAtLabel(dir) && nbrAtLabel(dir)._direction == _direction) {
@@ -135,21 +149,26 @@ if (redNbrCountSameDir(uniqueLabels()) == 1) {
 }
 }
 }
-}
+} */
 
 
        if (canExpand(expandDir) && !hasExpNbr()) {
       // Count neighbors in original position and expand.
-      numRedNbrsBefore = redNbrCount(uniqueLabels());
-      numRedNbrsSameDirBefore = redNbrCountSameDir(uniqueLabels());
+      //numRedNbrsBefore = redNbrCount(uniqueLabels());
+      //numRedNbrsSameDirBefore = redNbrCountSameDir(uniqueLabels());
+        numNbrsBefore = nbrCount(uniqueLabels());
+        numNbrsSameDirBefore = nbrCountSameDir(uniqueLabels());
       expand(expandDir);
 
 //      if (q == 2) {
   //           contractHead();
 //}
-      if (q > 1.1) {
+      if (_state == State::Blue) {
+          contractHead();
+      } else if (q > 1.1) { //If its red, and its in a line or stuck in a line, contract head most of time
           contractHead();
       }
+
 /*      if (q > 1 && q < 1.01) {
           contractTail();
       }
@@ -162,27 +181,29 @@ if (redNbrCountSameDir(uniqueLabels()) == 1) {
       flag = !hasExpNbr();
     }
        }   else {  // isExpanded().
-     int numRedNbrsAfter = redNbrCount(headLabels());
-     int numRedNbrsSameDirAfter = redNbrCountSameDir(headLabels());
+     //int numRedNbrsAfter = redNbrCount(headLabels());
+     //int numRedNbrsSameDirAfter = redNbrCountSameDir(headLabels());
+     int numNbrsAfter = nbrCount(headLabels());
+     int numNbrsSameDirAfter = nbrCountSameDir(headLabels());
 
-     if (!flag || numRedNbrsSameDirBefore == 5) {
+     if (!flag || numNbrsSameDirBefore == 5) {
 contractHead();
 }
 
-        else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q < x) { //Diffusion rate
+        else if (numNbrsAfter == 0 && numNbrsBefore == 0 && q < x) { //Diffusion rate
              contractTail();
          }
-     else if (numRedNbrsAfter == 0 && numRedNbrsBefore == 0 && q > x) {
+     else if (numNbrsAfter == 0 && numNbrsBefore == 0 && q > x) {
          contractHead();
      }
 
-     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q < y) {
+     else if (numNbrsAfter != 0 && numNbrsBefore == 0 && q < y) {
          contractTail();
      }
-     else if (numRedNbrsAfter != 0 && numRedNbrsBefore == 0 && q > y) {
+     else if (numNbrsAfter != 0 && numNbrsBefore == 0 && q > y) {
          contractHead();
      }
-     else if (numRedNbrsSameDirAfter == 1) {
+     else if (numNbrsSameDirAfter == 1) {
          contractTail();
      }
 
@@ -205,8 +226,8 @@ contractHead();
       // If the conditions are satisfied, contract to the new position;
       // otherwise, contract back to the original one.
 
-         else if ((q < pow(lambda, numRedNbrsAfter - numRedNbrsBefore))
-          && (checkRedProp1(S) || checkRedProp2(S))) {
+         else if ((q < pow(lambda, numNbrsAfter - numNbrsBefore))
+          && (checkProp1(S) || checkProp2(S))) {
         contractTail();
       }  else {
         contractHead();
@@ -250,8 +271,8 @@ contractHead();
           }
     } */
 
-if (system.getCount("# Activations")._value < 4000000) {
-  if (system.getCount("# Activations")._value % 400000 == 0) {
+if (system.getCount("# Activations")._value < 18000000) {
+  if (system.getCount("# Activations")._value % 5000 == 0) {
         int sideLen = static_cast<int>(std::round(30));
 
         int x = randInt(-sideLen + 1, sideLen);
@@ -280,7 +301,7 @@ int CompressionParticle::headMarkColor() const {
   return -1;
 }
 
- int CompressionParticle::headMarkDir() const {
+double CompressionParticle::headMarkDir() const {
     return _direction;
 }
 
@@ -503,11 +524,22 @@ bool CompressionParticle::stuckInLine() const {
     return false;
 }
 
-
 bool CompressionParticle::hasExpHeadAtLabel(const int label) const {
   return hasNbrAtLabel(label) && nbrAtLabel(label).isExpanded()
          && nbrAtLabel(label).pointsAtMyHead(*this, label);
 }
+
+int CompressionParticle::nbrCount(std::vector<int> labels) const {
+  int numNbrs = 0;
+  for (const int label : labels) {
+    if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
+      ++numNbrs;
+    }
+  }
+
+  return numNbrs;
+}
+
 
 int CompressionParticle::redNbrCount(std::vector<int> labels) const {
   int numRedNbrs = 0;
@@ -531,6 +563,17 @@ int CompressionParticle::redNbrCount(std::vector<int> labels) const {
   return numRedNbrsSameDir;
 }
 
+ int CompressionParticle::nbrCountSameDir(std::vector<int> labels) const {
+  int numNbrsSameDir = 0;
+  for (const int label : labels) {
+    if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label) && nbrAtLabel(label)._direction == _direction) {
+      ++numNbrsSameDir;
+    }
+  }
+
+  return numNbrsSameDir;
+}
+
 
 int CompressionParticle::blueNbrCount(std::vector<int> labels) const {
   int numBlueNbrs = 0;
@@ -543,7 +586,100 @@ int CompressionParticle::blueNbrCount(std::vector<int> labels) const {
   return numBlueNbrs;
 }
 
+bool CompressionParticle::checkProp1(std::vector<int> S) const {
+  Q_ASSERT(isExpanded());
+  Q_ASSERT(S.size() <= 2);
+  Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
 
+//if (_state == State::Red) { //MichaelM only Red particles follow compression algorithm,
+                                          //since q is randomly gen. between 0, 1 then prop1 rate of satisfaction is variable
+                                          //affecting rate of diffusivity
+  if (S.size() == 0) {
+    return false;  // S has to be nonempty for Property 1.
+  } else {
+    const std::vector<int> labels = uniqueLabels();
+    std::set<int> adjNbrs;
+
+    // Starting from the particles in S, sweep out and mark connected neighbors.
+    for (int s : S) {
+      adjNbrs.insert(s);
+      int i = distance(labels.begin(), find(labels.begin(), labels.end(), s));
+
+      // First sweep counter-clockwise, stopping when an unoccupied position or
+      // expanded head is encountered.
+      for (uint offset = 1; offset < labels.size(); ++offset) {
+        int label = labels[(i + offset) % labels.size()];
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) { //Left out "&& nbrAtLabel(label)._direction == _direction"
+          adjNbrs.insert(label);
+        } else {
+          break;
+        }
+      }
+
+      // Then sweep clockwise.
+      for (uint offset = 1; offset < labels.size(); ++offset) {
+        int label = labels[(i - offset + labels.size()) % labels.size()];
+        if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) { //Left out "&& nbrAtLabel(label)._direction == _direction"
+          adjNbrs.insert(label);
+        } else {
+          break;
+        }
+      }
+    }
+
+    // If all neighbors are connected to a particle in S by a path through the
+    // neighborhood, then the number of labels in adjNbrs should equal the total
+    // number of neighbors.
+    return adjNbrs.size() == (uint)nbrCount(labels); //MichaelM originally was just "nbrCount"
+  }
+}
+
+bool CompressionParticle::checkProp2(std::vector<int> S) const {
+  Q_ASSERT(isExpanded());
+  Q_ASSERT(S.size() <= 2);
+  Q_ASSERT(flag);  // Not required, but equivalent/cleaner for implementation.
+
+ //if (_state == State::Red) {   //MichaelM only Red particles follow compression algorithm,
+                                             //since q is randomly gen. between 0, 1 then prop2 rate of satisfaction is variable
+                                             //affecting rate of diffusivity
+  if (S.size() != 0) {     //also changed (S.size() != 0) to (S.size() == 0) (somewhat disables property 2 and allows particles to breakaway from cluster                           // S has to be empty for Property 2.
+    return false;  //MichaelM changed "return false" to "return true"
+  } else {
+//    const int numRedHeadNbrsSameDir = redNbrCountSameDir(headLabels());
+//    const int numRedTailNbrsSameDir = redNbrCountSameDir(tailLabels());
+    const int numHeadNbrs = nbrCount(headLabels());
+    const int numTailNbrs = nbrCount(tailLabels());
+
+    // Check if the head's neighbors are connected.
+    int numAdjHeadNbrs = 0;
+    bool seenNbr = false;
+    for (const int label : headLabels()) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) { //Left out "&& nbrAtLabel(label)._direction == _direction"
+        seenNbr = true;
+        ++numAdjHeadNbrs;
+      } else if (seenNbr) {
+        break;
+      }
+    }
+
+    // Check if the tail's neighbors are connected.
+    int numAdjTailNbrs = 0;
+    seenNbr = false;
+    for (const int label : tailLabels()) {
+      if (hasNbrAtLabel(label) && !hasExpHeadAtLabel(label)) {
+        seenNbr = true;
+        ++numAdjTailNbrs;
+      } else if (seenNbr) {
+        break;
+      }
+    }
+
+    // Property 2 is satisfied if both the head and tail have at least one
+    // neighbor and all head (tail) neighbors are connected.
+    return (numHeadNbrs > 0) && (numTailNbrs > 0) &&
+           (numHeadNbrs == numAdjHeadNbrs) && (numTailNbrs == numAdjTailNbrs);
+  }
+}
 
 bool CompressionParticle::checkRedProp1(std::vector<int> S) const {
   Q_ASSERT(isExpanded());

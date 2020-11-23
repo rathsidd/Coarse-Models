@@ -53,14 +53,16 @@ class CompressionParticle : public AmoebotParticle {
  // virtual QString inspectionText() const;
     int headMarkColor() const override; //MichaelM added head and tail colors, also removed "const override;" to "const;"
     int tailMarkColor() const override; //Not sure if this causes problems.
-      int headMarkDir() const override;
+      double headMarkDir() const override;
       int tailMarkDir() const override;
 protected:
   // Particle memory.
   const double lambda;
   double q;
+  int numNbrsBefore;
   int numRedNbrsBefore;
   int numBlueNbrsBefore;
+  int numNbrsSameDirBefore;
   int numRedNbrsSameDirBefore;
   bool flag;
   State _state;   //MichaelM added states (like in DiscoDemo)
@@ -88,11 +90,15 @@ private:
 
   // Counts the number of neighbors in the labeled positions. Note: this
   // implicitly assumes all neighbors are unique, as none are expanded.
+  int nbrCount(std::vector<int> labels) const;
+  int nbrCountSameDir(std::vector<int> labels) const;
   int redNbrCount(std::vector<int> labels) const;
   int redNbrCountSameDir(std::vector<int> labels) const;
   int blueNbrCount(std::vector<int> labels) const;
 
   // Functions for checking Properties 1 and 2 of the compression algorithm.
+  bool checkProp1(std::vector<int> S) const;
+  bool checkProp2(std::vector<int> S) const;
   bool checkRedProp1(std::vector<int> S) const;
   bool checkRedProp2(std::vector<int> S) const;
   bool checkBlueProp1(std::vector<int> S) const;
