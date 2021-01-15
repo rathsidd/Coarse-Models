@@ -43,6 +43,7 @@ class DiscoDemoParticle : public AmoebotParticle {
 
   // Executes one particle activation.
   void activate() override;
+  bool colorNbrCount(std::vector<int> labels) const;
 
   // Functions for altering the particle's color. headMarkColor() (resp.,
   // tailMarkColor()) returns the color to be used for the ring drawn around the

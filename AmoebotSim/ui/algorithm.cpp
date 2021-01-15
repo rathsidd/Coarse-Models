@@ -111,20 +111,24 @@ void TokenDemoAlg::instantiate(const int numParticles, const int lifetime) {
 CompressionAlg::CompressionAlg() : Algorithm("Compression", "compression") {
   addParameter("# Red Particles", "15");
   addParameter("# Blue Particles", "15");
+  addParameter("# Green Particles", "15");
   addParameter("Lambda", "4.0");
 }
 
-void CompressionAlg::instantiate(const int numRedParticles, const int numBlueParticles, const double lambda) {
+void CompressionAlg::instantiate(const int numRedParticles, const int numBlueParticles, const int numGreenParticles, const double lambda) {
     if (numRedParticles <= 0) {
       emit log("# red particles must be > 0", true);
     }
     if (numBlueParticles < 0) {
       emit log("# blue particles must be > 0 or = 0", true);
     }
+    if (numGreenParticles < 0) {
+      emit log("# green particles must be > 0 or = 0", true);
+    }
     else if (lambda <= 0) {
       emit log("lambda must be > 0", true);
     } else {
-      emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles));
+      emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles, numGreenParticles));
     }
   }
 

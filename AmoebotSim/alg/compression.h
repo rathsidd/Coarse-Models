@@ -23,6 +23,8 @@ class CompressionParticle : public AmoebotParticle {
   enum class State {
       Red,
       Blue,
+      Green,
+      Black,
   };
 
   enum class Direction {
@@ -83,10 +85,11 @@ private:
   // the position at the specified label.
   bool hasExpNbr() const;
   bool hasExpHeadAtLabel(const int label) const;
-  bool hasNbrInLine() const;
+  bool hasRBNbrInLine() const;
   int almostInLine() const;
   bool atEndOfLine() const;
   bool stuckInLine() const;
+  bool stuckInRedLine() const;
 
   // Counts the number of neighbors in the labeled positions. Note: this
   // implicitly assumes all neighbors are unique, as none are expanded.
@@ -113,7 +116,7 @@ class CompressionSystem : public AmoebotSystem {
   // generated surface (with no tunnels). Takes an optionally specified size
   // (#particles) and a bias parameter. A bias above 2 + sqrt(2) will provably
   // yield compression; a bias below 2.17 will provably yield expansion.
-  CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, double lambda = 4.0);
+  CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, unsigned int numGreenParticles = 15, double lambda = 4.0);
 
   // Because this algorithm never terminates, this simply returns false.
   virtual bool hasTerminated() const;

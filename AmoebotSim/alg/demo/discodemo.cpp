@@ -15,11 +15,17 @@ DiscoDemoParticle::DiscoDemoParticle(const Node& head, const int globalTailDir,
   _state = getRandColor();
 }
 
+bool DiscoDemoParticle::colorNbrCount(std::vector<int> labels) const {
+    for (const int label : labels) {
+      if (hasNbrAtLabel(label) && nbrAtLabel(label)._state == _state) {
+        return true;
+    }
+}
+    return false;
+}
+
 void DiscoDemoParticle::activate() {
 //   std::vector<std::vector<DiscoDemoParticle>> DiscoDemoSystem::getClusters();
-
-
-
 
   // First decrement the particle's counter. If it's zero, reset the counter and
   // get a new color.
@@ -41,6 +47,7 @@ void DiscoDemoParticle::activate() {
   if (isContracted()) {
 //      if (DiscoDemoSystem::getClusters())
 
+
 /*     for (int label : uniqueLabels()) {
         if (hasNbrAtLabel(label) && nbrAtLabel(label)._state == State::Blue) {
             nbrAtLabel(label)._state = State::Red;
@@ -56,16 +63,25 @@ void DiscoDemoParticle::activate() {
         }
 */
  //   int expandDir = randDir();
+
+
+      //bool nbrFlag = false;
       int expandDir = randDir();
+
 //      int globalizedDir = localToGlobalDir(expandDir);
 /*      if (DiscoDemoParticle::head.x == 1 || 2 || 3) {
           expandDir = 3;
       } else { expandDir = 3;
       }
       localToGlobalDir(expandDir); */
-      if (localToGlobalDir(expandDir) == 3 && canExpand(expandDir)) {
-              expand(expandDir);
-  }
+      //if (localToGlobalDir(expandDir) == 3 && canExpand(expandDir)) {
+              if (canExpand(expandDir) && !colorNbrCount(uniqueLabels())) {
+                expand(expandDir);
+              }
+
+
+
+  //}
 //    if (canExpand(localToGlobalDir(expandDir))) {
 //      expand(localToGlobalDir(expandDir));
 
@@ -109,23 +125,29 @@ void DiscoDemoParticle::activate() {
 contractTail();
 }
 
- if (system.getCount("# Activations")._value % 50 == 0) {
-      int sideLen = static_cast<int>(std::round(2 * std::sqrt(5)));
 
-      int x = randInt(-sideLen + 1, sideLen);
-      int y = randInt(1, 2 * sideLen);
-      Node node(x, y);
+//  if (system.getCount("# Activations")._value % 1 == 0) {
+//      system.particleMap.find()
+//  }
 
-      // If the node satisfies (iii) and is unoccupied, place a particle there.
-      if (0 < x + y && x + y < 2 * sideLen
-          && system.particleMap.find(node) == system.particleMap.end()) {
-          //if (DiscoDemoSystem::getClusters() > 1) {
-        system.insert(new DiscoDemoParticle(node, -1, randDir(), system, _counterMax));
-}
+//if (system.getCount("# Activations")._value % 50 == 0) {
+//      int sideLen = static_cast<int>(std::round(2 * std::sqrt(5)));
 
-  }
+//      int x = randInt(-sideLen + 1, sideLen);
+//      int y = randInt(1, 2 * sideLen);
+//      Node node(x, y);
+
+//      // If the node satisfies (iii) and is unoccupied, place a particle there.
+//      if (0 < x + y && x + y < 2 * sideLen
+//          && system.particleMap.find(node) == system.particleMap.end()) {
+//          //if (DiscoDemoSystem::getClusters() > 1) {
+//        system.insert(new DiscoDemoParticle(node, -1, randDir(), system, _counterMax));
+//}
+
+//  }
 }
 //}
+
 
 int DiscoDemoParticle::headMarkColor() const {
   switch(_state) {

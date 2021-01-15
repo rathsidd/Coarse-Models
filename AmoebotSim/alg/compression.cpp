@@ -53,16 +53,142 @@ void CompressionParticle::activate() {
 
 
     double x = 1.0; //Diffusion Rate without neighbors. All values acceptable.
-    double y = 0.2; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable.
-    double z = 0.8; //Affinity to detach from cluster. Values less than .1 are acceptable.
+    double y = 0.6; //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable. (updates / updates2 was 0.2)
+    double z = 0.4; //Affinity to detach from cluster. Values less than .1 are acceptable. (updates / updates2 was 0.8)
+    double a = 0.0015; //Old A value was 0.0015
+    double b = 1.2;
 //    double q2 = 0;
 
        if (isContracted()) {
 int expandDir = randDir();      //Store a potential direction to expand into (for use later)
 q = randDouble(0, 1);
 
-if (hasNbrInLine() && q < 0.0015) {     //If it is in a line with another particle, decide if it will turn blue or not.
-    _state = State::Blue;
+//FOR WT-GRBP5
+if (!hasRBNbrInLine() && !stuckInRedLine()) {       //REMOVED && _state != State::Black &&
+
+    if (_state == State::Red) {
+        if (q < 0.4032) {
+            _state = State::Blue;
+        } else { _state = State::Red; }
+    } else if (_state == State::Blue) {
+        if (q < 0.5968) {
+            _state = State::Red;
+        } else { _state = State::Blue; }
+    }
+     if (_state == State::Black && !hasRBNbrInLine() && !stuckInRedLine()) {
+         if (q < 0.5968) {
+             _state = State::Red;
+         } if (q > 0.5968) {
+             _state = State::Blue;
+  }
+     }
+}
+
+//FOR WT-GRBP5-8A
+/* if (!hasRBNbrInLine() && !stuckInRedLine()) { //REMOVED && _state != State::Black &&
+
+     if (_state == State::Red) {
+         if (q < 0.5) {
+             _state = State::Red;
+         } else { _state = State::Blue;
+     }
+     }
+     else if (_state == State::Blue) {
+         if (q < 0.333) {
+             _state = State::Green;
+         }
+         if (q > 0.333 && q < 0.666) {
+             _state = State::Blue;
+         }
+         if (q > 0.666) {
+             _state = State::Red;
+         }
+
+     }
+     else if (_state == State::Green) {
+              if (q < 0.5) {
+                  _state = State::Green;
+              } else { _state = State::Blue;
+          }
+          }
+
+     if (_state == State::Black && !hasRBNbrInLine() && !stuckInRedLine()) {
+         if (q < 0.33) {
+             _state = State::Red;
+         } if (q > 0.33 && q < 0.66) {
+             _state = State::Blue;
+         } if (q > 0.66) {
+             _state = State::Green;
+         }
+     }
+   }
+*/
+/*    if (q < 0.333) {
+         _state = State::Red;
+       }  else if (q > 0.333 && q < 0.666) {
+             _state = State::Blue;
+            } else if (q > 0.666) {
+                 _state = State::Green;
+             }
+         }
+
+    if (_state == State::Red) {
+        if (q < 0.333) {
+            _state = State::Red;
+        } else if (q > 0.333 && q < 0.666) {
+            _state = State::Blue;
+        } else if (q > 0.666) {
+            _state = State::Green;
+        }
+    }
+
+    if (_state == State::Blue) {
+        if (q < 0.333) {
+            _state = State::Blue;
+        } else if (q > 0.333 && q < 0.666) {
+            _state = State::Red;
+        } else if (q > 0.666) {
+            _state = State::Green;
+        }
+    }
+
+    if (_state == State::Green) {
+        if (q < 0.333) {
+            _state = State::Green;
+        } else if (q > 0.333 && q < 0.666) {
+            _state = State::Blue;
+        } else if (q > 0.666) {
+            _state = State::Red;
+        }
+    }
+}
+
+   if (q < 0.333) {
+        _state = State::Red;
+      }  else if (q > 0.333 && q < 0.666) {
+            _state = State::Blue;
+           } else if (q > 0.666) {
+                _state = State::Green;
+            }
+        }
+
+   if (_state == State::Red) {
+        if (q < 0.5) {
+            _state = State::Blue;
+        } else { _state = State::Red; }
+
+    } else if (_state == State::Blue) {
+        if (q < 0.5) {
+            _state = State::Green;
+        } else { _state = State::Blue; }
+    } */
+
+if (stuckInRedLine() && _state == State::Red) {
+    _state = State::Black;
+}
+
+if (hasRBNbrInLine() && !stuckInRedLine() && _state == State::Red && q < a) {     //If it is in a line with another particle, decide if it will turn black or not.
+    _state = State::Black;
 }
 
 
@@ -92,25 +218,48 @@ if (hasNbrInLine() && q < 0.0015) {     //If it is in a line with another partic
 } else expandDir = 2;
             } */
 
-if (!hasNbrInLine() && !stuckInLine()) {    //If by itself, turn back to red to move freely
-    _state = State::Red;
-}
+/*if (!hasRBNbrInLine() && !stuckInRedLine()) {    //If by itself, turn back to red to move freely
+    if (_state == State::Red) {
+        if (q < 0.5) {
+            _state = State::Red;
+        } else { _state = State::Blue;
+    }
+    }
+    else if (_state == State::Blue) {
+        if (q < 0.333) {
+            _state = State::Green;
+        }
+        if (q > 0.333 && q < 0.666) {
+            _state = State::Blue;
+        }
+        if (q > 0.666) {
+            _state = State::Red;
+        }
 
-if (hasNbrInLine() && stuckInLine() && q > 0.0015) {    //If it is sandwiched in a line but q is above the "convert to blue value" then do not break free
+    }
+    else if (_state == State::Green) {
+             if (q < 0.5) {
+                 _state = State::Green;
+             } else { _state = State::Blue;
+         }
+         }
+} */
+
+/*if (hasNbrInLine() && _state == State::Red) {    //If it is sandwiched in a line but q is above the "convert to blue value" then do not break free
     z = 0.00;                                           //Choose q so that if it does expand, it will automatically contract head (for use later)
     q = 2;
    } else if (hasNbrInLine() && q < 0.0015) {           //Decide again if it will convert to blue (but this time if its stuck in line, too, not just at the end)
         z = 0.00;
         q = 2;
         _state = State::Blue;
-    }
+    } */
 
-if (hasNbrInLine() && !stuckInLine()) {                 //If it is at the end of a line, pick q value so that once it expands it will contract back to be at the front of the line
+if (hasRBNbrInLine() && _state == State::Red) {                 //If it is at the end of a line, pick q value so that once it expands it will contract back to be at the front of the line
     q = randDouble(1, 2);                               //Should this be random chance? IMPORTANT
     z = 0.00;
 }
 
-if (!hasNbrInLine() && q < 1) { //Left out "&& redNbrCount(uniqueLabels()) == 0"
+if (!hasRBNbrInLine() && q < 1 && _state != State::Black) { //Left out "&& redNbrCount(uniqueLabels()) == 0"
     _direction = rand() % 3;
 }
 
@@ -160,12 +309,11 @@ if (q < 0.05 || q > 0.95) {
         numNbrsSameDirBefore = nbrCountSameDir(uniqueLabels());
       expand(expandDir);
 
-//      if (q == 2) {
-  //           contractHead();
-//}
-      if (_state == State::Blue) {
+
+      if (_state == State::Black) {
           contractHead();
-      } else if (q > 1.1) { //If its red, and its in a line or stuck in a line, contract head most of time
+      }
+      if (q > b && _state == State::Red) { //If its red, and its in a line or stuck in a line, contract head most of time
           contractHead();
       }
 
@@ -209,6 +357,7 @@ contractHead();
 
 
 
+
     else {
       // Count neighbors in new position and compute the set S.
 //      int numRedNbrsAfter = redNbrCount(headLabels());
@@ -222,6 +371,7 @@ contractHead();
       if (q < z) {
           contractTail();
      }
+      //if (numNbrsBefore > 0 && )
 
       // If the conditions are satisfied, contract to the new position;
       // otherwise, contract back to the original one.
@@ -271,9 +421,9 @@ contractHead();
           }
     } */
 
-if (system.getCount("# Activations")._value < 18000000) {
-  if (system.getCount("# Activations")._value % 5000 == 0) {
-        int sideLen = static_cast<int>(std::round(30));
+if (system.getCount("# Activations")._value < 1000000000) {
+  if (system.getCount("# Activations")._value % 8000 == 0) {
+        int sideLen = static_cast<int>(std::round(50));
 
         int x = randInt(-sideLen + 1, sideLen);
         int y = randInt(1, 2 * sideLen);
@@ -297,6 +447,13 @@ int CompressionParticle::headMarkColor() const {
   }
   else if (_state == State::Blue){
       return 0x0000ff;
+  }
+  else if (_state == State::Green){
+      return 0x00ff00;
+  }
+  else if (_state == State::Black){
+      return 000000;
+      //return -1;
   }
   return -1;
 }
@@ -353,51 +510,48 @@ bool CompressionParticle::hasExpNbr() const {
 
   return false;
 }
-bool CompressionParticle::hasNbrInLine() const {
+bool CompressionParticle::hasRBNbrInLine() const {
 
     if (_direction == 0) {
     if (hasNbrAtLabel(0)) {
-        if (nbrAtLabel(0)._direction == 0) {
+        if (nbrAtLabel(0)._direction == 0 && (nbrAtLabel(0)._state == State::Red || nbrAtLabel(0)._state == State::Black)) {
             return true;
         }
     }
-
      if (hasNbrAtLabel(3)) {
-        if (nbrAtLabel(3)._direction == 0) {
+        if (nbrAtLabel(3)._direction == 0 && (nbrAtLabel(3)._state == State::Red || nbrAtLabel(3)._state == State::Black)) {
                     return true;
                 }
     }
 }
-
      if (_direction == 1) {
     if (hasNbrAtLabel(1)) {
-        if (nbrAtLabel(1)._direction == 1) {
+        if (nbrAtLabel(1)._direction == 1 && (nbrAtLabel(1)._state == State::Red || nbrAtLabel(1)._state == State::Black)) {
             return true;
         }
     }
-
      if (hasNbrAtLabel(4)) {
-        if (nbrAtLabel(4)._direction == 1) {
+        if (nbrAtLabel(4)._direction == 1 && (nbrAtLabel(4)._state == State::Red || nbrAtLabel(4)._state == State::Black)) {
                     return true;
                 }
     }
 }
-
     if (_direction == 2) {
     if (hasNbrAtLabel(2)) {
-        if (nbrAtLabel(2)._direction == 2) {
+        if (nbrAtLabel(2)._direction == 2 && (nbrAtLabel(2)._state == State::Red || nbrAtLabel(2)._state == State::Black)) {
             return true;
         }
     }
-
      if (hasNbrAtLabel(5)) {
-        if (nbrAtLabel(5)._direction == 2) {
+        if (nbrAtLabel(5)._direction == 2 && (nbrAtLabel(5)._state == State::Red || nbrAtLabel(5)._state == State::Black)) {
                     return true;
                 }
     }
 }
     return false;
 }
+
+
 
 /* int CompressionParticle::almostInLine() const {
     //bool hasOneAdjNbrSameDir = false;
@@ -524,6 +678,41 @@ bool CompressionParticle::stuckInLine() const {
     return false;
 }
 
+bool CompressionParticle::stuckInRedLine() const {
+
+    if (_direction == 0) {
+    if (hasNbrAtLabel(0) && hasNbrAtLabel(3)) {
+        if (nbrAtLabel(0)._direction == 0 && nbrAtLabel(3)._direction == 0
+                && (nbrAtLabel(0)._state == State::Red || nbrAtLabel(0)._state == State::Black)
+                && (nbrAtLabel(3)._state == State::Red || nbrAtLabel(3)._state == State::Black)) {
+            return true;
+        }
+    }
+}
+
+    if (_direction == 1) {
+    if (hasNbrAtLabel(1) && hasNbrAtLabel(4)) {
+        if (nbrAtLabel(1)._direction == 1 && nbrAtLabel(4)._direction == 1
+                && (nbrAtLabel(1)._state == State::Red || nbrAtLabel(1)._state == State::Black)
+                && (nbrAtLabel(4)._state == State::Red || nbrAtLabel(4)._state == State::Black)) {
+            return true;
+        }
+    }
+}
+
+    if (_direction == 2) {
+    if (hasNbrAtLabel(2) && hasNbrAtLabel(5)) {
+        if (nbrAtLabel(2)._direction == 2 && nbrAtLabel(5)._direction == 2
+                && (nbrAtLabel(2)._state == State::Red || nbrAtLabel(2)._state == State::Black)
+                && (nbrAtLabel(5)._state == State::Red || nbrAtLabel(5)._state == State::Black)) {
+            return true;
+        }
+    }
+}
+
+    return false;
+}
+
 bool CompressionParticle::hasExpHeadAtLabel(const int label) const {
   return hasNbrAtLabel(label) && nbrAtLabel(label).isExpanded()
          && nbrAtLabel(label).pointsAtMyHead(*this, label);
@@ -539,6 +728,11 @@ int CompressionParticle::nbrCount(std::vector<int> labels) const {
 
   return numNbrs;
 }
+
+/*int CompressionParticle::alignTailNbrCount(std::vector<int> labels) const {
+    int numAlignTailNbrs = 0;
+    for (const int )
+} */
 
 
 int CompressionParticle::redNbrCount(std::vector<int> labels) const {
@@ -887,12 +1081,12 @@ bool CompressionParticle::checkBlueProp2(std::vector<int> S) const {
 }*/
 
 
-CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int numBlueParticles, double lambda) {
+CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int numBlueParticles, unsigned int numGreenParticles, double lambda) {
   Q_ASSERT(lambda > 1);
 
   //  int numParticles = numBlueParticles + numRedParticles;
     //MichaelM added hexagon creation and random particle insertion similar to DiscoDemo but for CompressionParticles
-    int sideLen = static_cast<int>(std::round(30)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
+    int sideLen = static_cast<int>(std::round(50)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
      Node boundNode(0, 0);                                                     //perhaps make this a variable? to easily modify?
      for (int dir = 0; dir < 6; ++dir) {
        for (int i = 0; i < sideLen; ++i) {
@@ -935,9 +1129,27 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
        // If the node satisfies (iii) and is unoccupied, place a particle there.
        if (0 < x + y && x + y < 2 * sideLen
            && occupied.find(blueNode) == occupied.end()) {
-         insert(new CompressionParticle(blueNode, -1, randDir(), *this, lambda, CompressionParticle::State::Blue));
+         insert(new CompressionParticle(blueNode, -1, 0, *this, lambda, CompressionParticle::State::Blue));
          occupied.insert(blueNode);
          numBlueAdded++;
+       }
+   }
+     }
+
+     unsigned int numGreenAdded = 0;
+     if (numGreenParticles > 0) {
+     while (numGreenAdded < numGreenParticles) {
+       // First, choose an x and y position at random from the (i) and (ii) bounds.
+       int x = randInt(-sideLen + 1, sideLen);
+       int y = randInt(1, 2 * sideLen);
+       Node greenNode(x, y);
+
+       // If the node satisfies (iii) and is unoccupied, place a particle there.
+       if (0 < x + y && x + y < 2 * sideLen
+           && occupied.find(greenNode) == occupied.end()) {
+         insert(new CompressionParticle(greenNode, -1, 0, *this, lambda, CompressionParticle::State::Green));
+         occupied.insert(greenNode);
+         numGreenAdded++;
        }
    }
      }
