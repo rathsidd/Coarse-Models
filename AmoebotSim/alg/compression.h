@@ -85,7 +85,7 @@ private:
   // the position at the specified label.
   bool hasExpNbr() const;
   bool hasExpHeadAtLabel(const int label) const;
-  bool hasRBNbrInLine() const;
+  bool hasRBNbrInLine() const; //has red or black neighbor that it is aligned with
   int almostInLine() const;
   bool atEndOfLine() const;
   bool stuckInLine() const;
