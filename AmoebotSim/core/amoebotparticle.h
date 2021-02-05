@@ -153,6 +153,7 @@ class AmoebotParticle : public LocalParticle, public RandomNumberGenerator {
                 propertyCheck) const;
 
   AmoebotSystem& system;
+  //int sideLen;
 
  private:
   std::deque<std::shared_ptr<Token>> tokens;

@@ -31,6 +31,7 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   // counts.
   AmoebotSystem();
   std::vector<Measure*> _measures;
+    int sideLen;
 
   // Deletes the particles, objects, and metrics in this system before
   // destructing the system.

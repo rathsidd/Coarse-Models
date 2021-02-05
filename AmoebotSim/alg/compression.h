@@ -19,6 +19,9 @@
 class CompressionParticle : public AmoebotParticle {
   friend class CompressionSystem;
   friend class PerimeterMeasure;
+  friend class SurfaceArea;
+  friend class PercentOrdering;
+  friend class SurfaceAreaNumeratorParticles;
 
   enum class State {
       Red,
@@ -110,6 +113,9 @@ private:
 
 class CompressionSystem : public AmoebotSystem {
   friend class PerimeterMeasure;
+  friend class SurfaceArea;
+  friend class PercentOrdering;
+  friend class SurfaceAreaNumeratorParticles;
 
  public:
   // Constructs a system of CompressionParticles connected to a randomly
@@ -117,9 +123,12 @@ class CompressionSystem : public AmoebotSystem {
   // (#particles) and a bias parameter. A bias above 2 + sqrt(2) will provably
   // yield compression; a bias below 2.17 will provably yield expansion.
   CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, unsigned int numGreenParticles = 15, double lambda = 4.0);
-
   // Because this algorithm never terminates, this simply returns false.
   virtual bool hasTerminated() const;
+  int sideLen;
+  protected:
+    //int nodesOccupied; // Priti
+    // int totalNodes; // Priti
 };
 
 class PerimeterMeasure : public Measure {
@@ -132,6 +141,45 @@ class PerimeterMeasure : public Measure {
   // Calculates the perimeter of the system, i.e., the number of edges on the
   // walk around the unique external boundary of the system. Uses the fact
   // that perimeter = (3 * #particles) - (#nearest neighbor pairs) - 3.
+  double calculate() const final;
+
+ protected:
+  CompressionSystem& _system;
+};
+
+class SurfaceArea : public Measure {
+ public:
+  // Constructs a SurfaceArea
+  SurfaceArea(const QString name, const unsigned int freq,
+                    CompressionSystem& system);
+
+  // Calculated the percentage of surface area covered.
+  double calculate() const final;
+
+ protected:
+  CompressionSystem& _system;
+};
+
+class SurfaceAreaNumeratorParticles : public Measure {
+ public:
+  // Constructs a SurfaceArea
+  SurfaceAreaNumeratorParticles(const QString name, const unsigned int freq,
+                    CompressionSystem& system);
+
+  // Calculated the percentage of surface area covered.
+  double calculate() const final;
+
+ protected:
+  CompressionSystem& _system;
+};
+
+class PercentOrdering : public Measure {
+ public:
+  // Constructs a SurfaceArea
+  PercentOrdering(const QString name, const unsigned int freq,
+                    CompressionSystem& system);
+
+  // Calculated the percentage of surface area covered.
   double calculate() const final;
 
  protected:
