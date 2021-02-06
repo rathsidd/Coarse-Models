@@ -9,6 +9,10 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <iostream>
+#include <list>
+#include <iterator>
+#include <unordered_set>
 
 #include <QtGlobal>
 
@@ -293,6 +297,7 @@ void CompressionParticle::activate()
     }
   }
   // system.getCount("Surface Coverage").record(round(system.size()/((3*sqrt(3) * pow(50, 2))/2)));
+  //(system).getClusters();
 }
 // end of activate
 
@@ -1057,10 +1062,58 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
   _measures.push_back(new SurfaceAreaNumeratorParticles("SC Particles/Nodes", 1, *this));
   _measures.push_back(new PercentOrdering("% Ordering", 1, *this));
 
+    getClusters();
+
   //_counts.push_back(new Count("Surface Coverage"));
 
   //totalNodes = (3*sqrt(3) * pow(50, 2))/2;  // Hexagon area = (3*√3 *(sideLen)^2)/ 2
 }
+
+void CompressionSystem::DFS(CompressionParticle &p, std::vector<CompressionParticle> cluster)
+{
+  p.counted = true;
+  cluster.push_back(p);
+
+  for (int j = 0; j < 6; j++)
+  {
+    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).counted)
+    {
+      DFS(p.nbrAtLabel(j), cluster);
+    }
+  }
+}
+
+//std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
+void CompressionSystem::getClusters()
+{
+  std::vector<std::vector<CompressionParticle>> allClusters;
+
+  // Reset all visited flags.
+  for (auto &p : particles)
+  {
+    auto disco_p = dynamic_cast<CompressionParticle *>(p);
+    disco_p->counted = false;
+  }
+
+  // Do DFS.
+  for (auto &p : particles)
+  {
+    auto disco_p = dynamic_cast<CompressionParticle *>(p);
+    if (!disco_p->counted)
+    {
+      std::vector<CompressionParticle> cluster = {};
+      DFS(*disco_p, cluster);
+      allClusters.push_back(cluster);
+    }
+  }
+  for(auto vec1: allClusters) {
+    std::cout << vec1.size() << " ";
+  }
+  //return allClusters;
+}
+
+
+
 
 // map? we want to find average for each group?
 // heights first then widths avgs
@@ -1086,68 +1139,83 @@ void DFS(Graph const &graph, int v, vector<bool> &discovered)
     }
 }
 */
-/*
-// right now this just gets the 
-int CompressionSystem::allGroups() {
-  List<int> avgHeights = new List<int>();
-  for(CompressionParticle particle: this.particles) {
-    if(!particle.counted) {
-      int height = findGroup(particle);
-      avgHeights.add(height);
+
+// right now this just gets the
+/*void CompressionSystem::allGroups()
+{
+  std::vector<int> avgHeights;
+  for (const auto &p : this->particles)
+  {
+    auto particle = dynamic_cast<CompressionParticle *>(p);
+    //for(AmoebotParticle particleTemp: this->particles) {
+    //CompressionParticle* particle dynamic_cast<CompressionParticle *> (particleTemp);
+    if (!particle->counted && particle->_state == CompressionParticle::State::Black)
+    {
+      int height = this->findGroup(particle);
+      avgHeights.insert(avgHeights.end(), height);
     }
   }
 }
-
+*/
 // right now this just gets average height of the group particle is in
-int CompressionSystem::findGroup(CompressionParticle particle)
+/*int CompressionSystem::findGroup(CompressionParticle* particle)
 {
+  // have groupNum field so we can associate hieght with width?
+  // have dir be a var locally so no repeat
   // Set of particles yet to traverse for that group: no duplicates
-  HashSet<CompressionParticle> inGroup = new HashSet<CompressionParticle>();
+  std::set<CompressionParticle*> inGroup;
   // set of heights for that group
-  List<int> heights = new List<int>();
+  std::vector<int> heights;
   // set of widths for that group
-  List<int> widths = new List<int>();
+  std::vector<int> widths;
 
   // only want to go through this group if particle is not already counted
   // because if this particle is counted then whole group should already be counted
-  if (!particle.counted)
+  if (!particle->counted)
 
   {
-    particle.counted = true;
+    particle->counted = true;
 
     // count is for height righ now
     int count = 0;
+
 
     // if in a certain direction, only want to count particles in that direction
     // DO THIS FOR ALL DIRECTIONS AFTER CONFIRMING IT IS OK
     // for dir 1, nbr 1 and 4
     // for dir 2, nbr 2 and 5
-    if (particle_direction == 0)
+    if (particle->_direction == 0)
     {
       // line not needed probably
-      inGroup.add(particle);
+      inGroup.insert(particle);
       // while there is a neighbor at 0, keep going to that side and count
       // it and add it to the set
-      while (particle.hasNbrAtLabel(0))
+      while (particle->hasNbrAtLabel(0))
       {
         // check if same direction, black color, and not counted
-        if ((nbrAtLabel(0)._direction == 0) && nbrAtLabel(0)._state == CompressionParticle::State::Black && (nbrAtLabel(0).counted == false))
+      
+        if ((particle->nbrAtLabel(0)._direction == 0)
+         && particle->nbrAtLabel(0)._state == CompressionParticle::State::Black 
+         && particle->nbrAtLabel(0).counted == false)
         {
           count++;
-          particle = nbrAtLabel(0);
-          particle.counted = true;
-          inGroup.add(particle);
+
+          // Can't set particle to be equal to another particle???
+          particle = dynamic_cast<CompressionParticle *>(particle->nbrAtLabel(0));
+          particle->counted = true;
+          inGroup.insert(particle);
         }
       }
-
+    
+    
       // while there is a neighbor at 3, keep going to that side and count
       // it and add it to the set
-      while (hasNbrAtLabel(3))
+      while (particle.hasNbrAtLabel(3))
       {
         // check if same direction, black color, and not counted
-        if (nbrAtLabel(3)._direction == 0 && nbrAtLabel(0)._state == CompressionParticle::State::Black && (nbrAtLabel(3).counted == false){
+        if (particle.nbrAtLabel(3)._direction == 0 && particle.nbrAtLabel(0)._state == CompressionParticle::State::Black && (particle.nbrAtLabel(3).counted == false){
           count++;
-          particle = nbrAtLabel(3);
+          particle = particle.nbrAtLabel(3);
           particle.counted = true;
           inGroup.add(particle);
         }
@@ -1161,29 +1229,29 @@ int CompressionSystem::findGroup(CompressionParticle particle)
         for (CompressionParticle neighbors : cp.headLabels())
         {
           // check if same direction, black color, and not counted
-          if (particle._direction == 0 && nbrAtLabel(0)._state == CompressionParticle::State::Black && !particle.counted)
+          if (particle._direction == 0 && particle.nbrAtLabel(0)._state == CompressionParticle::State::Black && !particle.counted)
           {
             count = 0;
             particle = neighbor;
             // then travel across height again and add to heights list
             while (particle.hasNbrAtLabel(0))
             {
-              if ((nbrAtLabel(0)._direction == 0) && nbrAtLabel(0)._state == CompressionParticle::State::Black && (nbrAtLabel(0).counted == false))
+              if ((particle.nbrAtLabel(0)._direction == 0) && particle.nbrAtLabel(0)._state == CompressionParticle::State::Black && (particle.nbrAtLabel(0).counted == false))
               {
                 count++;
-                particle = nbrAtLabel(0);
+                particle = particle.nbrAtLabel(0);
                 particle.counted = true;
-                // keep adding particles that it goes to to inGroup, so 
+                // keep adding particles that it goes to to inGroup, so
                 // we check all of the neighbors of the particles we are traversing
                 inGroup.add(particle);
               }
             }
-            while (hasNbrAtLabel(3))
+            while (particle.hasNbrAtLabel(3))
             {
-              if (nbrAtLabel(3)._direction == 0 && nbrAtLabel(0)._state == CompressionParticle::State::Black && (nbrAtLabel(3).counted == false)
+              if (particle.nbrAtLabel(3)._direction == 0 && particle.nbrAtLabel(0)._state == CompressionParticle::State::Black && (particle.nbrAtLabel(3).counted == false)
               {
                 count++;
-                particle = nbrAtLabel(3);
+                particle = particle.nbrAtLabel(3);
                 particle.counted = true;
                 inGroup.add(particle);
               }
@@ -1193,15 +1261,18 @@ int CompressionSystem::findGroup(CompressionParticle particle)
         }
       }
     }
-    }
+  }
   int sum = 0;
-  for (int i = 0; i < heights.size(); i ++) {
+  for (int i = 0; i < heights.size(); i++)
+  {
     sum += heights.get(i);
   }
-  return sum/heights.size();
+  return sum / heights.size();
+
+  return 0;
 }
 */
-    /*if (_direction == 1)
+/*if (_direction == 1)
       {
         while (hasNbrAtLabel(1))
         {
@@ -1242,7 +1313,6 @@ int CompressionSystem::findGroup(CompressionParticle particle)
         }
         }
       }*/
-  
 
 bool CompressionSystem::hasTerminated() const
 {
@@ -1305,7 +1375,7 @@ double SurfaceArea::calculate() const
     }
   }
 
-  return ((double)(nodesOccupied)) / (3.0005*pow(_system.sideLen, 2) - 3.0246*_system.sideLen + 1.0154);
+  return ((double)(nodesOccupied)) / (3.0005 * pow(_system.sideLen, 2) - 3.0246 * _system.sideLen + 1.0154);
 }
 
 SurfaceAreaNumeratorParticles::SurfaceAreaNumeratorParticles(const QString name, const unsigned int freq,
@@ -1331,7 +1401,7 @@ double SurfaceAreaNumeratorParticles::calculate() const
     //}
   }
 
-  return ((double)(particles)) / (3.0005*pow(_system.sideLen, 2) - 3.0246*_system.sideLen + 1.0154);
+  return ((double)(particles)) / (3.0005 * pow(_system.sideLen, 2) - 3.0246 * _system.sideLen + 1.0154);
 }
 
 PercentOrdering::PercentOrdering(const QString name, const unsigned int freq,

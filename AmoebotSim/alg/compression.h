@@ -11,6 +11,16 @@
 #ifndef AMOEBOTSIM_ALG_COMPRESSION_H_
 #define AMOEBOTSIM_ALG_COMPRESSION_H_
 
+#include <algorithm> // For distance() and find().
+#include <set>
+#include <vector>
+#include <map>
+#include <string>
+#include <iostream> 
+#include <list> 
+#include <iterator>
+#include <unordered_set>
+
 #include <QString>
 
 #include "core/amoebotparticle.h"
@@ -123,6 +133,11 @@ class CompressionSystem : public AmoebotSystem {
   // (#particles) and a bias parameter. A bias above 2 + sqrt(2) will provably
   // yield compression; a bias below 2.17 will provably yield expansion.
   CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, unsigned int numGreenParticles = 15, double lambda = 4.0);
+  int findGroup(CompressionParticle* particle);
+  void allGroups();
+  void DFS(CompressionParticle& p, std::vector<CompressionParticle> cluster);
+  //std::vector<std::vector<CompressionParticle>> getClusters();
+  void getClusters();
   // Because this algorithm never terminates, this simply returns false.
   virtual bool hasTerminated() const;
   int sideLen;
