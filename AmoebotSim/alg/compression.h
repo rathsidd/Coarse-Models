@@ -138,7 +138,9 @@ class CompressionSystem : public AmoebotSystem {
   int findGroup(CompressionParticle* particle);
   void allGroups();
   //std::vector<CompressionParticle> DFS(CompressionParticle &p);
-  void DFS(CompressionParticle &p, std::vector<CompressionParticle> &cluster);
+  void DFSHeight(CompressionParticle &p, std::vector<CompressionParticle> &cluster);
+  void DFSWidth(CompressionParticle &p, std::vector<CompressionParticle> &cluster, int dir);
+  void DFSCluster(CompressionParticle &p, std::vector<CompressionParticle> &cluster);
   std::vector<std::vector<CompressionParticle>> getClusters();
   //void getClusters();
   // Because this algorithm never terminates, this simply returns false.

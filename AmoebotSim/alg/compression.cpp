@@ -1067,67 +1067,156 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
   //totalNodes = (3*sqrt(3) * pow(50, 2))/2;  // Hexagon area = (3*√3 *(sideLen)^2)/ 2
 }
 
-void CompressionSystem::DFS(CompressionParticle &p, std::vector<CompressionParticle> &cluster)
+void CompressionSystem::DFSCluster(CompressionParticle &p, std::vector<CompressionParticle> &cluster)
 {
   // have height cluster and width cluster? no new method for width.!!!!!!!!!!!!!!!
-  p.counted = true;
+  p.countedCluster = true;
   cluster.push_back(p);
 
   // there are the only direction we need to check to get height
-  for (int j = p._direction; j < 6; j=j+3)
+  for (int j = 0; j < 6; j++)
   {
-    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).counted 
-      && (p._direction == p.nbrAtLabel(j)._direction)
-      && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black)) 
+    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedCluster
+    && (p._direction == p.nbrAtLabel(j)._direction) 
+    && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
     {
-      DFS(p.nbrAtLabel(j), cluster);
+      DFSCluster(p.nbrAtLabel(j), cluster);
     }
-    //std::cout << "size: " << cluster.size() << std::endl;
   }
-  /*for (int j = 0; j < 6; j++) {
-    if((j !=p._direction) || (j !=(p._direction+3))) {
+}
 
+void CompressionSystem::DFSWidth(CompressionParticle &p, std::vector<CompressionParticle> &cluster, int dir)
+{
+  // have height cluster and width cluster? no new method for width.!!!!!!!!!!!!!!!
+  p.countedWidth = true;
+  cluster.push_back(p);
+     //std::cout << "Dir: " << dir << std::endl;
+  if(dir = -2) 
+  {
+    for (int j = 0; j < 6; j++)
+    {
+      if ((j != p._direction) && (j != (p._direction + 3)))
+      {
+        if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedWidth
+        && (p._direction == p.nbrAtLabel(j)._direction)
+        && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
+        {
+          int dirToPass;
+          if(j >= 3) {
+            dirToPass = j -3;
+          }
+          else {
+            dirToPass = j;
+          }
+          DFSWidth(p.nbrAtLabel(j), cluster, dirToPass);
+          break;
+        }
+      }
     }
-  }*/
+  }
+  else {
+    if(dir<3 && dir>=0) 
+    {
+      
+      for (int j = dir; j < 6; j = j + 3)
+      {
+        if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedWidth
+        && (p._direction == p.nbrAtLabel(j)._direction) 
+        && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
+        {
+          DFSWidth(p.nbrAtLabel(j), cluster, dir);
+        }
+      }
+    }
+  }
+}
 
+void CompressionSystem::DFSHeight(CompressionParticle &p, std::vector<CompressionParticle> &cluster)
+{
+  // have height cluster and width cluster? no new method for width.!!!!!!!!!!!!!!!
+  p.countedHeight = true;
+  cluster.push_back(p);
 
+  // there are the only direction we need to check to get height
+  for (int j = p._direction; j < 6; j = j + 3)
+  {
+    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedHeight 
+    && (p._direction == p.nbrAtLabel(j)._direction) 
+    && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
+    {
+      DFSHeight(p.nbrAtLabel(j), cluster);
+    }
+  }
 }
 
 std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
 //void CompressionSystem::getClusters()
 {
+  std::vector<std::vector<CompressionParticle>> allHeights;
+  std::vector<std::vector<CompressionParticle>> allWidths;
   std::vector<std::vector<CompressionParticle>> allClusters;
 
   // Reset all visited flags.
   for (auto &p : particles)
   {
     auto disco_p = dynamic_cast<CompressionParticle *>(p);
-    disco_p->counted = false;
+    disco_p->countedHeight = false;
+    disco_p->countedWidth = false;
+    disco_p->countedCluster = false;
   }
 
   // Do DFS.
   for (auto &p : particles)
   {
     auto disco_p = dynamic_cast<CompressionParticle *>(p);
-    if (!disco_p->counted && disco_p->_state == CompressionParticle::State::Black)
+    if (!disco_p->countedHeight && disco_p->_state == CompressionParticle::State::Black)
     {
-      std::vector<CompressionParticle> cluster = {};
-      DFS(*disco_p, cluster);
-      allClusters.push_back(cluster);
+      std::vector<CompressionParticle> heights = {};
+      DFSHeight(*disco_p, heights);
+      allHeights.push_back(heights);
+    }
+    if (!disco_p->countedWidth && disco_p->_state == CompressionParticle::State::Black)
+    {
+      std::vector<CompressionParticle> width = {};
+      DFSWidth(*disco_p, width, -2);
+      allWidths.push_back(width);
+    }
+    if (!disco_p->countedCluster && disco_p->_state == CompressionParticle::State::Black)
+    {
+      std::vector<CompressionParticle> clusters = {};
+      DFSCluster(*disco_p, clusters);
+      allClusters.push_back(clusters);
     }
   }
-  std::cout << "new round:" << std::endl;
-  for(auto vec1: allClusters) {
-    if(vec1.size() > 0) {
+  std::cout << "all heights:" << std::endl;
+  for (auto vec1 : allHeights)
+  {
+    if (vec1.size() > 1)
+    {
       std::cout << vec1.size() << " ";
     }
   }
   std::cout << std::endl;
-  return allClusters;
+  std::cout << "all widths:" << std::endl;
+  for (auto vec1 : allWidths)
+  {
+    if (vec1.size() > 1)
+    {
+      std::cout << vec1.size() << " ";
+    }
+  }
+  std::cout << std::endl;
+  std::cout << "all clusters:" << std::endl;
+  for (auto vec1 : allClusters)
+  {
+    if (vec1.size() > 1)
+    {
+      std::cout << vec1.size() << " ";
+    }
+  }
+  std::cout << std::endl;
+  return allWidths;
 }
-
-
-
 
 // map? we want to find average for each group?
 // heights first then widths avgs
@@ -1442,19 +1531,22 @@ double PercentOrdering::calculate() const
 }
 
 DFSDebugging::DFSDebugging(const QString name,
-                                     const unsigned int freq,
-                                     CompressionSystem& system)
+                           const unsigned int freq,
+                           CompressionSystem &system)
     : Measure(name, freq),
       _system(system) {}
 
-double DFSDebugging::calculate() const {
+double DFSDebugging::calculate() const
+{
   int numRed = 0;
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
   // Loop through all particles of the system.
-  for (const auto& p : _system.particles) {
+  for (const auto &p : _system.particles)
+  {
     // Convert the pointer to a MetricsDemoParticle so its color can be checked.
-    auto metr_p = dynamic_cast<CompressionParticle*>(p);
-    if (metr_p->_state == CompressionParticle::State::Red) {
+    auto metr_p = dynamic_cast<CompressionParticle *>(p);
+    if (metr_p->_state == CompressionParticle::State::Red)
+    {
       numRed++;
     }
   }
