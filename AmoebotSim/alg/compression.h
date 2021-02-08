@@ -32,6 +32,7 @@ class CompressionParticle : public AmoebotParticle {
   friend class SurfaceArea;
   friend class PercentOrdering;
   friend class SurfaceAreaNumeratorParticles;
+  friend class DFSDebugging;
 
   enum class State {
       Red,
@@ -126,6 +127,7 @@ class CompressionSystem : public AmoebotSystem {
   friend class SurfaceArea;
   friend class PercentOrdering;
   friend class SurfaceAreaNumeratorParticles;
+  friend class DFSDebugging;
 
  public:
   // Constructs a system of CompressionParticles connected to a randomly
@@ -135,9 +137,10 @@ class CompressionSystem : public AmoebotSystem {
   CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, unsigned int numGreenParticles = 15, double lambda = 4.0);
   int findGroup(CompressionParticle* particle);
   void allGroups();
-  void DFS(CompressionParticle& p, std::vector<CompressionParticle> cluster);
-  //std::vector<std::vector<CompressionParticle>> getClusters();
-  void getClusters();
+  //std::vector<CompressionParticle> DFS(CompressionParticle &p);
+  void DFS(CompressionParticle &p, std::vector<CompressionParticle> &cluster);
+  std::vector<std::vector<CompressionParticle>> getClusters();
+  //void getClusters();
   // Because this algorithm never terminates, this simply returns false.
   virtual bool hasTerminated() const;
   int sideLen;
@@ -192,6 +195,19 @@ class PercentOrdering : public Measure {
  public:
   // Constructs a SurfaceArea
   PercentOrdering(const QString name, const unsigned int freq,
+                    CompressionSystem& system);
+
+  // Calculated the percentage of surface area covered.
+  double calculate() const final;
+
+ protected:
+  CompressionSystem& _system;
+};
+
+class DFSDebugging : public Measure {
+ public:
+  // Constructs a SurfaceArea
+  DFSDebugging(const QString name, const unsigned int freq,
                     CompressionSystem& system);
 
   // Calculated the percentage of surface area covered.
