@@ -1069,17 +1069,27 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
 
 void CompressionSystem::DFS(CompressionParticle &p, std::vector<CompressionParticle> &cluster)
 {
+  // have height cluster and width cluster? no new method for width.!!!!!!!!!!!!!!!
   p.counted = true;
   cluster.push_back(p);
 
-  for (int j = 0; j < 6; j++)
+  // there are the only direction we need to check to get height
+  for (int j = p._direction; j < 6; j=j+3)
   {
-    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).counted)
+    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).counted 
+      && (p._direction == p.nbrAtLabel(j)._direction)
+      && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black)) 
     {
       DFS(p.nbrAtLabel(j), cluster);
     }
     //std::cout << "size: " << cluster.size() << std::endl;
   }
+  /*for (int j = 0; j < 6; j++) {
+    if((j !=p._direction) || (j !=(p._direction+3))) {
+
+    }
+  }*/
+
 
 }
 
@@ -1099,18 +1109,20 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
   for (auto &p : particles)
   {
     auto disco_p = dynamic_cast<CompressionParticle *>(p);
-    if (!disco_p->counted)
+    if (!disco_p->counted && disco_p->_state == CompressionParticle::State::Black)
     {
       std::vector<CompressionParticle> cluster = {};
       DFS(*disco_p, cluster);
       allClusters.push_back(cluster);
     }
   }
+  std::cout << "new round:" << std::endl;
   for(auto vec1: allClusters) {
     if(vec1.size() > 0) {
       std::cout << vec1.size() << " ";
     }
   }
+  std::cout << std::endl;
   return allClusters;
 }
 
