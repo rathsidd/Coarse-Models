@@ -1090,12 +1090,16 @@ void CompressionSystem::DFSWidth(CompressionParticle &p, std::vector<Compression
   // have height cluster and width cluster? no new method for width.!!!!!!!!!!!!!!!
   p.countedWidth = true;
   cluster.push_back(p);
-     //std::cout << "Dir: " << dir << std::endl;
-  if(dir = -2) 
+  if(dir != -2) {
+     std::cout << "Dir: " << dir << std::endl;
+     //std::cout << "Direction: " << p._direction << std::endl;
+  }
+  if(dir == -2) 
   {
+    bool found = false;
     for (int j = 0; j < 6; j++)
     {
-      if ((j != p._direction) && (j != (p._direction + 3)))
+      if (!found && (j != p._direction) && (j != (p._direction + 3)))
       {
         if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedWidth
         && (p._direction == p.nbrAtLabel(j)._direction)
@@ -1108,6 +1112,7 @@ void CompressionSystem::DFSWidth(CompressionParticle &p, std::vector<Compression
           else {
             dirToPass = j;
           }
+          found = true;
           DFSWidth(p.nbrAtLabel(j), cluster, dirToPass);
           break;
         }
@@ -1115,16 +1120,20 @@ void CompressionSystem::DFSWidth(CompressionParticle &p, std::vector<Compression
     }
   }
   else {
+      std::cout << "dir one " << dir << std::endl;
+    // this is a given
     if(dir<3 && dir>=0) 
     {
-      
+      std::cout << "dir two " << dir << std::endl;
       for (int j = dir; j < 6; j = j + 3)
       {
         if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedWidth
         && (p._direction == p.nbrAtLabel(j)._direction) 
         && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
         {
+          std::cout << "dir three" << dir << std::endl;
           DFSWidth(p.nbrAtLabel(j), cluster, dir);
+          std::cout << "dir four" << dir << std::endl;
         }
       }
     }
