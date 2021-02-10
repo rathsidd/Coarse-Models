@@ -1212,22 +1212,30 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
       {
         std::cout << "cluster size " << clusters.size() << std::endl;
         std::cout << "heights in this cluster: " << heights.size() << std::endl;
+        int sumHeights = 0;
         for (auto vec1 : heights)
         {
           //if (vec1.size() > 1)
           //{
-            std::cout << vec1.size() << " ";
+            //std::cout << vec1.size() << " ";
+            sumHeights+= vec1.size();
           //}
         }
-        std::cout << std::endl;
+        double avgHeight = ((double)sumHeights)/((double)heights.size());
+        std::cout << "avg height for this cluster: " << avgHeight << std::endl;
+        //std::cout << std::endl;
         std::cout << "widths in this cluster: " << widths.size() << std::endl;
+        int sumWidths = 0;
         for (auto vec1 : widths)
         {
           //if (vec1.size() > 1)
           //{
-            std::cout << vec1.size() << " ";
+            //std::cout << vec1.size() << " ";
+            sumWidths+= vec1.size();
           //}
         }
+        double avgWidth = ((double)sumWidths)/((double)widths.size());
+        std::cout << "avg width for this cluster: " << avgWidth << std::endl;
         std::cout << std::endl;
       }
     }
