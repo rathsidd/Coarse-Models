@@ -1067,20 +1067,32 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
   //totalNodes = (3*sqrt(3) * pow(50, 2))/2;  // Hexagon area = (3*√3 *(sideLen)^2)/ 2
 }
 
-void CompressionSystem::DFSCluster(CompressionParticle &p, std::vector<CompressionParticle> &cluster)
+void CompressionSystem::DFSCluster(CompressionParticle &p, std::vector<CompressionParticle> &cluster,
+                                   std::vector<std::vector<CompressionParticle>> &heights, std::vector<std::vector<CompressionParticle>> &widths)
 {
   // have height cluster and width cluster? no new method for width.!!!!!!!!!!!!!!!
   p.countedCluster = true;
   cluster.push_back(p);
 
-  // there are the only direction we need to check to get height
   for (int j = 0; j < 6; j++)
   {
-    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedCluster
-    && (p._direction == p.nbrAtLabel(j)._direction) 
-    && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
+    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedCluster && (p._direction == p.nbrAtLabel(j)._direction) && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
     {
-      DFSCluster(p.nbrAtLabel(j), cluster);
+      DFSCluster(p.nbrAtLabel(j), cluster, heights, widths);
+    }
+
+    if (!p.countedHeight && p._state == CompressionParticle::State::Black)
+    {
+      std::vector<CompressionParticle> oneHeight = {};
+      DFSHeight(p, oneHeight);
+      heights.push_back(oneHeight);
+    }
+
+    if (!p.countedWidth && p._state == CompressionParticle::State::Black)
+    {
+      std::vector<CompressionParticle> oneWidth = {};
+      DFSWidth(p, oneWidth, -2);
+      widths.push_back(oneWidth);
     }
   }
 }
@@ -1090,26 +1102,27 @@ void CompressionSystem::DFSWidth(CompressionParticle &p, std::vector<Compression
   // have height cluster and width cluster? no new method for width.!!!!!!!!!!!!!!!
   p.countedWidth = true;
   cluster.push_back(p);
-  if(dir != -2) {
-     std::cout << "Dir: " << dir << std::endl;
-     //std::cout << "Direction: " << p._direction << std::endl;
+  if (dir != -2)
+  {
+    //std::cout << "Dir: " << dir << std::endl;
+    //std::cout << "Direction: " << p._direction << std::endl;
   }
-  if(dir == -2) 
+  if (dir == -2)
   {
     bool found = false;
     for (int j = 0; j < 6; j++)
     {
       if (!found && (j != p._direction) && (j != (p._direction + 3)))
       {
-        if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedWidth
-        && (p._direction == p.nbrAtLabel(j)._direction)
-        && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
+        if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedWidth && (p._direction == p.nbrAtLabel(j)._direction) && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
         {
           int dirToPass;
-          if(j >= 3) {
-            dirToPass = j -3;
+          if (j >= 3)
+          {
+            dirToPass = j - 3;
           }
-          else {
+          else
+          {
             dirToPass = j;
           }
           found = true;
@@ -1119,21 +1132,20 @@ void CompressionSystem::DFSWidth(CompressionParticle &p, std::vector<Compression
       }
     }
   }
-  else {
-      std::cout << "dir one " << dir << std::endl;
+  else
+  {
+    //std::cout << "dir one " << dir << std::endl;
     // this is a given
-    if(dir<3 && dir>=0) 
+    if (dir < 3 && dir >= 0)
     {
-      std::cout << "dir two " << dir << std::endl;
+      //std::cout << "dir two " << dir << std::endl;
       for (int j = dir; j < 6; j = j + 3)
       {
-        if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedWidth
-        && (p._direction == p.nbrAtLabel(j)._direction) 
-        && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
+        if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedWidth && (p._direction == p.nbrAtLabel(j)._direction) && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
         {
-          std::cout << "dir three" << dir << std::endl;
+          //std::cout << "dir three" << dir << std::endl;
           DFSWidth(p.nbrAtLabel(j), cluster, dir);
-          std::cout << "dir four" << dir << std::endl;
+          //std::cout << "dir four" << dir << std::endl;
         }
       }
     }
@@ -1149,9 +1161,7 @@ void CompressionSystem::DFSHeight(CompressionParticle &p, std::vector<Compressio
   // there are the only direction we need to check to get height
   for (int j = p._direction; j < 6; j = j + 3)
   {
-    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedHeight 
-    && (p._direction == p.nbrAtLabel(j)._direction) 
-    && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
+    if (p.hasNbrAtLabel(j) && !p.nbrAtLabel(j).countedHeight && (p._direction == p.nbrAtLabel(j)._direction) && (p.nbrAtLabel(j)._state == CompressionParticle::State::Black))
     {
       DFSHeight(p.nbrAtLabel(j), cluster);
     }
@@ -1178,7 +1188,7 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
   for (auto &p : particles)
   {
     auto disco_p = dynamic_cast<CompressionParticle *>(p);
-    if (!disco_p->countedHeight && disco_p->_state == CompressionParticle::State::Black)
+    /*if (!disco_p->countedHeight && disco_p->_state == CompressionParticle::State::Black)
     {
       std::vector<CompressionParticle> heights = {};
       DFSHeight(*disco_p, heights);
@@ -1190,14 +1200,85 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
       DFSWidth(*disco_p, width, -2);
       allWidths.push_back(width);
     }
+    */
     if (!disco_p->countedCluster && disco_p->_state == CompressionParticle::State::Black)
     {
       std::vector<CompressionParticle> clusters = {};
-      DFSCluster(*disco_p, clusters);
+      std::vector<std::vector<CompressionParticle>> heights = {};
+      std::vector<std::vector<CompressionParticle>> widths = {};
+      DFSCluster(*disco_p, clusters, heights, widths);
       allClusters.push_back(clusters);
+      if (clusters.size() > 1)
+      {
+        std::cout << "cluster size " << clusters.size() << std::endl;
+        std::cout << "heights in this cluster: " << heights.size() << std::endl;
+        for (auto vec1 : heights)
+        {
+          //if (vec1.size() > 1)
+          //{
+            std::cout << vec1.size() << " ";
+          //}
+        }
+        std::cout << std::endl;
+        std::cout << "widths in this cluster: " << widths.size() << std::endl;
+        for (auto vec1 : widths)
+        {
+          //if (vec1.size() > 1)
+          //{
+            std::cout << vec1.size() << " ";
+          //}
+        }
+        std::cout << std::endl;
+      }
     }
   }
-  std::cout << "all heights:" << std::endl;
+  /*  std::map<std::vector<int>, std::vector<int>> heightsWidthsByCluster;
+  // clustervec
+  for (auto cv : allClusters)
+  {
+    std::vector<int> widthsForCluster;
+    std::vector<int> heightsForCluster;
+    // for particle in cluster
+    for (auto &p : cv)
+    {
+      auto disco_p = dynamic_cast<CompressionParticle *>(p);
+      //vector = wv
+      for (auto wv : allWidths)
+      {
+        if (std::find(wv.begin(), wv.end(), p) != wv.end())
+        {
+          // wv contains p
+          widthsForCluster.insert(wv.size());
+          allWidths.erase(wv);
+        }
+      }
+      for (auto hv : allHeights)
+      {
+        if (std::find(hv.begin(), hv.end(), p) != hv.end())
+        int size = static_cast<int>(hv.size());
+        heightsForCluster.insert(size);
+        allHeights.erase(hv);
+      }
+    }
+
+    //avg height of cluster
+    int heightSumForCluster = 0;
+    for(auto hei: heightsForCluster) {
+      heightSumForCluster += hei;
+    }
+    int avgHeight = heightSumForCluster/heightsForCluster.size();
+
+    //avg width of cluster
+    int widthSumForCluster = 0;
+    for(auto wid: widthsForCluster) {
+      widthSumForCluster += wid;
+    }
+    int avgWidth = widthSumForCluster/widthsForCluster.size();
+    
+    heightsWidthsByCluster.insert(avgHeight, avgWidth);
+    
+  }*/
+  /*std::cout << "all heights:" << std::endl;
   for (auto vec1 : allHeights)
   {
     if (vec1.size() > 1)
@@ -1224,6 +1305,7 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
     }
   }
   std::cout << std::endl;
+  */
   return allWidths;
 }
 
@@ -1548,6 +1630,7 @@ DFSDebugging::DFSDebugging(const QString name,
 double DFSDebugging::calculate() const
 {
   int numRed = 0;
+  std::cout << "NEW ROUND" << std::endl;
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
   // Loop through all particles of the system.
   for (const auto &p : _system.particles)

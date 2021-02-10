@@ -140,7 +140,8 @@ class CompressionSystem : public AmoebotSystem {
   //std::vector<CompressionParticle> DFS(CompressionParticle &p);
   void DFSHeight(CompressionParticle &p, std::vector<CompressionParticle> &cluster);
   void DFSWidth(CompressionParticle &p, std::vector<CompressionParticle> &cluster, int dir);
-  void DFSCluster(CompressionParticle &p, std::vector<CompressionParticle> &cluster);
+  void DFSCluster(CompressionParticle &p, std::vector<CompressionParticle> &cluster, 
+    std::vector<std::vector<CompressionParticle>> &heights, std::vector<std::vector<CompressionParticle>> &widths);
   std::vector<std::vector<CompressionParticle>> getClusters();
   //void getClusters();
   // Because this algorithm never terminates, this simply returns false.
