@@ -1061,7 +1061,8 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
   _measures.push_back(new SurfaceArea("SC Nodes/Nodes", 1, *this));
   _measures.push_back(new SurfaceAreaNumeratorParticles("SC Particles/Nodes", 1, *this));
   _measures.push_back(new PercentOrdering("% Ordering", 1, *this));
-  _measures.push_back(new DFSDebugging("DFS", 1, *this));
+  _measures.push_back(new AvgHeight("Avg Height", 1, *this));
+  _measures.push_back(new AvgWidth("Avg Width", 1, *this));
   //_counts.push_back(new Count("Surface Coverage"));
 
   //totalNodes = (3*sqrt(3) * pow(50, 2))/2;  // Hexagon area = (3*√3 *(sideLen)^2)/ 2
@@ -1188,7 +1189,7 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
   for (auto &p : particles)
   {
     auto disco_p = dynamic_cast<CompressionParticle *>(p);
-    /*if (!disco_p->countedHeight && disco_p->_state == CompressionParticle::State::Black)
+    if (!disco_p->countedHeight && disco_p->_state == CompressionParticle::State::Black)
     {
       std::vector<CompressionParticle> heights = {};
       DFSHeight(*disco_p, heights);
@@ -1200,8 +1201,10 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
       DFSWidth(*disco_p, width, -2);
       allWidths.push_back(width);
     }
-    */
-    if (!disco_p->countedCluster && disco_p->_state == CompressionParticle::State::Black)
+    
+
+   // To Find hieght and width for each cluster independently
+    /*if (!disco_p->countedCluster && disco_p->_state == CompressionParticle::State::Black)
     {
       std::vector<CompressionParticle> clusters = {};
       std::vector<std::vector<CompressionParticle>> heights = {};
@@ -1238,8 +1241,19 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
         std::cout << "avg width for this cluster: " << avgWidth << std::endl;
         std::cout << std::endl;
       }
-    }
+    }*/
   }
+  int sumAllHeights = 0;
+  int sumAllWidths = 0;
+  for(auto h: allHeights){
+    sumAllHeights+= h.size();
+  }
+  for(auto w: allWidths) {
+    sumAllWidths+= w.size();
+  }
+  this->averageHeight = ((double)sumAllHeights)/((double)allHeights.size());
+  this->averageWidth = ((double)sumAllWidths)/((double)allWidths.size());
+  std::cout << averageHeight << "  " << averageWidth << std::endl; 
   /*  std::map<std::vector<int>, std::vector<int>> heightsWidthsByCluster;
   // clustervec
   for (auto cv : allClusters)
@@ -1629,27 +1643,25 @@ double PercentOrdering::calculate() const
   return ((double)(numBlack)) / static_cast<double>(_system.size());
 }
 
-DFSDebugging::DFSDebugging(const QString name,
+AvgHeight::AvgHeight(const QString name,
                            const unsigned int freq,
                            CompressionSystem &system)
     : Measure(name, freq),
       _system(system) {}
 
-double DFSDebugging::calculate() const
+double AvgHeight::calculate() const
 {
-  int numRed = 0;
-  std::cout << "NEW ROUND" << std::endl;
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
-  // Loop through all particles of the system.
-  for (const auto &p : _system.particles)
-  {
-    // Convert the pointer to a MetricsDemoParticle so its color can be checked.
-    auto metr_p = dynamic_cast<CompressionParticle *>(p);
-    if (metr_p->_state == CompressionParticle::State::Red)
-    {
-      numRed++;
-    }
-  }
+  return _system.averageHeight;
+}
+AvgWidth::AvgWidth(const QString name,
+                           const unsigned int freq,
+                           CompressionSystem &system)
+    : Measure(name, freq),
+      _system(system) {}
 
-  return numRed / static_cast<double>(_system.size()) * 100;
+double AvgWidth::calculate() const
+{
+  std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
+  return _system.averageWidth;
 }

@@ -32,7 +32,8 @@ class CompressionParticle : public AmoebotParticle {
   friend class SurfaceArea;
   friend class PercentOrdering;
   friend class SurfaceAreaNumeratorParticles;
-  friend class DFSDebugging;
+  friend class AvgHeight;
+  friend class AvgWidth;
 
   enum class State {
       Red,
@@ -127,7 +128,8 @@ class CompressionSystem : public AmoebotSystem {
   friend class SurfaceArea;
   friend class PercentOrdering;
   friend class SurfaceAreaNumeratorParticles;
-  friend class DFSDebugging;
+  friend class AvgHeight;
+  friend class AvgWidth;
 
  public:
   // Constructs a system of CompressionParticles connected to a randomly
@@ -147,6 +149,8 @@ class CompressionSystem : public AmoebotSystem {
   // Because this algorithm never terminates, this simply returns false.
   virtual bool hasTerminated() const;
   int sideLen;
+  double averageHeight;
+  double averageWidth;
   protected:
     //int nodesOccupied; // Priti
     // int totalNodes; // Priti
@@ -207,10 +211,23 @@ class PercentOrdering : public Measure {
   CompressionSystem& _system;
 };
 
-class DFSDebugging : public Measure {
+class AvgHeight : public Measure {
  public:
   // Constructs a SurfaceArea
-  DFSDebugging(const QString name, const unsigned int freq,
+  AvgHeight(const QString name, const unsigned int freq,
+                    CompressionSystem& system);
+
+  // Calculated the percentage of surface area covered.
+  double calculate() const final;
+
+ protected:
+  CompressionSystem& _system;
+};
+
+class AvgWidth : public Measure {
+ public:
+  // Constructs a SurfaceArea
+  AvgWidth(const QString name, const unsigned int freq,
                     CompressionSystem& system);
 
   // Calculated the percentage of surface area covered.
