@@ -1254,7 +1254,7 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
   }
   this->averageHeight = ((double)sumAllHeights) / ((double)allHeights.size());
   this->averageWidth = ((double)sumAllWidths) / ((double)allWidths.size());
-  std::cout << averageHeight << "  " << averageWidth << std::endl;
+  //std::cout << averageHeight << "  " << averageWidth << std::endl;
   /*  std::map<std::vector<int>, std::vector<int>> heightsWidthsByCluster;
   // clustervec
   for (auto cv : allClusters)
