@@ -1201,9 +1201,8 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
       DFSWidth(*disco_p, width, -2);
       allWidths.push_back(width);
     }
-    
 
-   // To Find hieght and width for each cluster independently
+    // To Find hieght and width for each cluster independently
     /*if (!disco_p->countedCluster && disco_p->_state == CompressionParticle::State::Black)
     {
       std::vector<CompressionParticle> clusters = {};
@@ -1245,15 +1244,17 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
   }
   int sumAllHeights = 0;
   int sumAllWidths = 0;
-  for(auto h: allHeights){
-    sumAllHeights+= h.size();
+  for (auto h : allHeights)
+  {
+    sumAllHeights += h.size();
   }
-  for(auto w: allWidths) {
-    sumAllWidths+= w.size();
+  for (auto w : allWidths)
+  {
+    sumAllWidths += w.size();
   }
-  this->averageHeight = ((double)sumAllHeights)/((double)allHeights.size());
-  this->averageWidth = ((double)sumAllWidths)/((double)allWidths.size());
-  std::cout << averageHeight << "  " << averageWidth << std::endl; 
+  this->averageHeight = ((double)sumAllHeights) / ((double)allHeights.size());
+  this->averageWidth = ((double)sumAllWidths) / ((double)allWidths.size());
+  std::cout << averageHeight << "  " << averageWidth << std::endl;
   /*  std::map<std::vector<int>, std::vector<int>> heightsWidthsByCluster;
   // clustervec
   for (auto cv : allClusters)
@@ -1644,24 +1645,35 @@ double PercentOrdering::calculate() const
 }
 
 AvgHeight::AvgHeight(const QString name,
-                           const unsigned int freq,
-                           CompressionSystem &system)
+                     const unsigned int freq,
+                     CompressionSystem &system)
     : Measure(name, freq),
-      _system(system) {}
+      _system(system)
+{
+  counter = 0;
+}
 
 double AvgHeight::calculate() const
 {
-  std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
+  //counter++;
+  //if (counter % 5 == 0)
+  //{
+    std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
+  //}
   return _system.averageHeight;
 }
 AvgWidth::AvgWidth(const QString name,
-                           const unsigned int freq,
-                           CompressionSystem &system)
+                   const unsigned int freq,
+                   CompressionSystem &system)
     : Measure(name, freq),
       _system(system) {}
 
 double AvgWidth::calculate() const
 {
+  //counter++;
+  //if (counter % 5 == 0)
+  //{
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
+  //}
   return _system.averageWidth;
 }

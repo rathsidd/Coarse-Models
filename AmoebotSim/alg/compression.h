@@ -219,9 +219,11 @@ class AvgHeight : public Measure {
 
   // Calculated the percentage of surface area covered.
   double calculate() const final;
+  
 
  protected:
   CompressionSystem& _system;
+  int counter;
 };
 
 class AvgWidth : public Measure {
@@ -232,6 +234,7 @@ class AvgWidth : public Measure {
 
   // Calculated the percentage of surface area covered.
   double calculate() const final;
+  int counter;
 
  protected:
   CompressionSystem& _system;
