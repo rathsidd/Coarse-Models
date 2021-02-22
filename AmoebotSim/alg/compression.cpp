@@ -1058,11 +1058,13 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
     }
   }
   _measures.push_back(new PerimeterMeasure("Perimeter", 1, *this));
-  _measures.push_back(new SurfaceArea("SC Nodes/Nodes", 1, *this));
-  _measures.push_back(new SurfaceAreaNumeratorParticles("SC Particles/Nodes", 1, *this));
+  _measures.push_back(new SurfaceArea("% SC Nodes/Nodes", 1, *this));
+  _measures.push_back(new SurfaceAreaNumeratorParticles("% SC Particles/Nodes", 1, *this));
   _measures.push_back(new PercentOrdering("% Ordering", 1, *this));
   _measures.push_back(new AvgHeight("Avg Height", 1, *this));
   _measures.push_back(new AvgWidth("Avg Width", 1, *this));
+  _measures.push_back(new MaxHeight("Max Height", 1, *this));
+  _measures.push_back(new MaxWidth("Max Width", 1, *this));
   //_counts.push_back(new Count("Surface Coverage"));
 
   //totalNodes = (3*sqrt(3) * pow(50, 2))/2;  // Hexagon area = (3*√3 *(sideLen)^2)/ 2
@@ -1244,14 +1246,29 @@ std::vector<std::vector<CompressionParticle>> CompressionSystem::getClusters()
   }
   int sumAllHeights = 0;
   int sumAllWidths = 0;
+  this->maxHeight = 0;
+  this->maxWidth = 0;
+  //std::cout << "heights: " ;
   for (auto h : allHeights)
   {
+    // std::cout << h.size() << " ";
     sumAllHeights += h.size();
+    if(h.size() > this->maxHeight) {
+     
+      this->maxHeight = h.size();
+    }
   }
+  //std::cout << std::endl << "widths: ";
   for (auto w : allWidths)
   {
+    //std::cout << w.size() << " ";
     sumAllWidths += w.size();
+    
+     if(w.size() > this->maxWidth) {
+      this->maxWidth = w.size();
+    }
   }
+   //std::cout << std::endl;
   this->averageHeight = ((double)sumAllHeights) / ((double)allHeights.size());
   this->averageWidth = ((double)sumAllWidths) / ((double)allWidths.size());
   //std::cout << averageHeight << "  " << averageWidth << std::endl;
@@ -1592,7 +1609,7 @@ double SurfaceArea::calculate() const
     }
   }
 
-  return ((double)(nodesOccupied)) / (3.0005 * pow(_system.sideLen, 2) - 3.0246 * _system.sideLen + 1.0154);
+  return ((double)(nodesOccupied)*100.0) / (3.0005 * pow(_system.sideLen, 2) - 3.0246 * _system.sideLen + 1.0154);
 }
 
 SurfaceAreaNumeratorParticles::SurfaceAreaNumeratorParticles(const QString name, const unsigned int freq,
@@ -1618,7 +1635,7 @@ double SurfaceAreaNumeratorParticles::calculate() const
     //}
   }
 
-  return ((double)(particles)) / (3.0005 * pow(_system.sideLen, 2) - 3.0246 * _system.sideLen + 1.0154);
+  return ((double)(particles)*100.0) / (3.0005 * pow(_system.sideLen, 2) - 3.0246 * _system.sideLen + 1.0154);
 }
 
 PercentOrdering::PercentOrdering(const QString name, const unsigned int freq,
@@ -1641,7 +1658,7 @@ double PercentOrdering::calculate() const
     }
   }
 
-  return ((double)(numBlack)) / static_cast<double>(_system.size());
+  return ((double)(numBlack)*100.0) / static_cast<double>(_system.size());
 }
 
 AvgHeight::AvgHeight(const QString name,
@@ -1676,4 +1693,30 @@ double AvgWidth::calculate() const
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
   //}
   return _system.averageWidth;
+}
+MaxWidth::MaxWidth(const QString name,
+                   const unsigned int freq,
+                   CompressionSystem &system)
+    : Measure(name, freq),
+      _system(system) {}
+
+double MaxWidth::calculate() const
+{
+  std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
+  //std::cout << "NEW ROUND " << std::endl;
+  std::cout << "maxW: " << _system.maxWidth << std::endl;
+  return _system.maxWidth;
+}
+
+MaxHeight::MaxHeight(const QString name,
+                   const unsigned int freq,
+                   CompressionSystem &system)
+    : Measure(name, freq),
+      _system(system) {}
+
+double MaxHeight::calculate() const
+{
+  std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
+  std::cout << "maxH: " << _system.maxHeight << std::endl;
+  return _system.maxHeight;
 }

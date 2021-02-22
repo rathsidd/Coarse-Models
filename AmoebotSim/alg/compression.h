@@ -34,6 +34,8 @@ class CompressionParticle : public AmoebotParticle {
   friend class SurfaceAreaNumeratorParticles;
   friend class AvgHeight;
   friend class AvgWidth;
+  friend class MaxHeight;
+  friend class MaxWidth;
 
   enum class State {
       Red,
@@ -130,6 +132,8 @@ class CompressionSystem : public AmoebotSystem {
   friend class SurfaceAreaNumeratorParticles;
   friend class AvgHeight;
   friend class AvgWidth;
+  friend class MaxHeight;
+  friend class MaxWidth;
 
  public:
   // Constructs a system of CompressionParticles connected to a randomly
@@ -151,6 +155,8 @@ class CompressionSystem : public AmoebotSystem {
   int sideLen;
   double averageHeight;
   double averageWidth;
+  int maxWidth;
+  int maxHeight;
   protected:
     //int nodesOccupied; // Priti
     // int totalNodes; // Priti
@@ -230,6 +236,34 @@ class AvgWidth : public Measure {
  public:
   // Constructs a SurfaceArea
   AvgWidth(const QString name, const unsigned int freq,
+                    CompressionSystem& system);
+
+  // Calculated the percentage of surface area covered.
+  double calculate() const final;
+  int counter;
+
+ protected:
+  CompressionSystem& _system;
+};
+
+class MaxWidth : public Measure {
+ public:
+  // Constructs a SurfaceArea
+  MaxWidth(const QString name, const unsigned int freq,
+                    CompressionSystem& system);
+
+  // Calculated the percentage of surface area covered.
+  double calculate() const final;
+  int counter;
+
+ protected:
+  CompressionSystem& _system;
+};
+
+class MaxHeight : public Measure {
+ public:
+  // Constructs a SurfaceArea
+  MaxHeight(const QString name, const unsigned int freq,
                     CompressionSystem& system);
 
   // Calculated the percentage of surface area covered.
