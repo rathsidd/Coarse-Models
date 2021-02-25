@@ -88,7 +88,7 @@ void AmoebotSystem::remove(AmoebotParticle* particle) {
       it = particleMap.find(particle->tail());
       particleMap.erase(it);
       activatedParticles.erase(particle);
-      //particles.erase(std::remove(particles.begin(), particles.end(), particle), particles.end());
+      particles.erase(std::remove(particles.begin(), particles.end(), particle), particles.end());
     }
   }
 }
