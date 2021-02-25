@@ -65,6 +65,34 @@ const std::deque<Object*>& AmoebotSystem::getObjects() const {
   return objects;
 }
 
+void AmoebotSystem::remove(AmoebotParticle* particle) {
+  // hasTerminated and isConnected make them constant and 
+  if(particles.size() > 1) {
+    if(particle->isContracted()) {
+      std::map<Node, AmoebotParticle*>::iterator it;
+      std::vector<AmoebotParticle*>::iterator it2;
+      it = particleMap.find(particle->head);
+       particleMap.erase(it);
+      activatedParticles.erase(particle);
+      /*it2 = std::find (particles.begin(), particles.end(), particle);
+      if (it2 != particles.end()) // == myVector.end() means the element was not found
+      particles.erase(it2);
+      */
+      particles.erase(std::remove(particles.begin(), particles.end(), particle), particles.end());
+      delete particle;
+    }
+    else {
+      std::map<Node, AmoebotParticle*>::iterator it;
+      it = particleMap.find(particle->head);
+      particleMap.erase(it);
+      it = particleMap.find(particle->tail());
+      particleMap.erase(it);
+      activatedParticles.erase(particle);
+      //particles.erase(std::remove(particles.begin(), particles.end(), particle), particles.end());
+    }
+  }
+}
+
 void AmoebotSystem::insert(AmoebotParticle* particle) {
   Q_ASSERT(particleMap.find(particle->head) == particleMap.end());
   Q_ASSERT(objectMap.find(particle->head) == objectMap.end());

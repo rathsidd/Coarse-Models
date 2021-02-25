@@ -38,7 +38,6 @@ CompressionParticle::CompressionParticle(const Node head,
 
 void CompressionParticle::activate()
 {
-
   double x = 1.0;    //Diffusion Rate without neighbors. All values acceptable.
   double y = 0.6;    //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable. ("updates" / "updates2" was 0.2)
   double z = 0.4;    //Affinity to detach from cluster. (updates / updates2 was 0.8)
@@ -298,6 +297,7 @@ void CompressionParticle::activate()
   }
   // system.getCount("Surface Coverage").record(round(system.size()/((3*sqrt(3) * pow(50, 2))/2)));
   //(system).getClusters();
+system.remove(this);
 }
 // end of activate
 

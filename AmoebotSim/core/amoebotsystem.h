@@ -60,6 +60,7 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   // occupied.
   void insert(AmoebotParticle* particle);
   void insert(Object* object);
+  void remove(AmoebotParticle* particle);
 
   // Functions for logging system progress. registerMovement logs the given
   // number of movements the system has made. registerActivation logs that the
