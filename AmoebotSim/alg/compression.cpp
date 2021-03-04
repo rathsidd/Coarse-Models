@@ -1551,10 +1551,10 @@ void DFS(Graph const &graph, int v, vector<bool> &discovered)
 bool CompressionSystem::hasTerminated() const
 {
 #ifdef QT_DEBUG
-  if (!isConnected(particles))
+  /*if (!isConnected(particles))
   {
     return true;
-  }
+  }*/
 #endif
 
   return false;
