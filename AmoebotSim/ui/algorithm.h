@@ -100,7 +100,11 @@ class CompressionAlg : public Algorithm {
   CompressionAlg();
 
  public slots:
-  void instantiate(const int numRedParticles = 15, const int numBlueParticles = 15, const int numGreenParticles = 15, const double lambda = 4.0);
+  void instantiate(const int numRedParticles = 15, const int numBlueParticles = 15, 
+const int numGreenParticles = 15, const double lambda = 4.0, const double diffusionRate = 1.0, 
+const double bindingAffinity = 0.6, const double seperationAffinity = 0.4, const double convertToStable = 0.0015,
+const double detachFromLine = 1.2);
+  //void instantiate(const int numRedParticles = 15, const int numBlueParticles = 15, const int numGreenParticles = 15, const double lambda = 4.0);
 };
 
 // Infinite Object Coating.

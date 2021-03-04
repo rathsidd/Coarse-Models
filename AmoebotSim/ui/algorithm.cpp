@@ -113,9 +113,17 @@ CompressionAlg::CompressionAlg() : Algorithm("Compression", "compression") {
   addParameter("# Blue Particles", "15");
   addParameter("# Green Particles", "15");
   addParameter("Lambda", "4.0");
+  addParameter("Diffusion Rate", "1.0");
+  addParameter("Binding Affinity", "0.6");
+  addParameter("Separation Affinity", "0.4");
+  addParameter("Convert to Stable", "0.0015");
+  addParameter("Detach from Line", "1.2");
 }
 
-void CompressionAlg::instantiate(const int numRedParticles, const int numBlueParticles, const int numGreenParticles, const double lambda) {
+void CompressionAlg::instantiate(const int numRedParticles, const int numBlueParticles, 
+const int numGreenParticles, const double lambda, const double diffusionRate, 
+const double bindingAffinity, const double seperationAffinity, const double convertToStable,
+const double detachFromLine) {
     if (numRedParticles <= 0) {
       emit log("# red particles must be > 0", true);
     }
@@ -127,7 +135,23 @@ void CompressionAlg::instantiate(const int numRedParticles, const int numBluePar
     }
     else if (lambda <= 0) {
       emit log("lambda must be > 0", true);
-    } else {
+    }
+    else if (diffusionRate <= 0) {
+      emit log("diffusionRate must be > 0", true);
+    }
+    else if (bindingAffinity <= 0) {
+      emit log("bindingAffinity must be > 0", true);
+    }
+    else if (seperationAffinity <= 0) {
+      emit log("seperationAffinity must be > 0", true);
+    }
+    else if (convertToStable <= 0) {
+      emit log("convertToStable must be > 0", true);
+    }
+    else if (detachFromLine <= 0) {
+      emit log("Detach From Line must be > 0", true);
+    }
+    else {
       emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles, numGreenParticles));
     }
   }
