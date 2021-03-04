@@ -39,11 +39,21 @@ CompressionParticle::CompressionParticle(const Node head,
 void CompressionParticle::activate()
 {
 
-  double x = 1.0;    //Diffusion Rate without neighbors. All values acceptable.
-  double y = 0.6;    //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable. ("updates" / "updates2" was 0.2)
-  double z = 0.4;    //Affinity to detach from cluster. (updates / updates2 was 0.8)
-  double a = 0.0015; //Old A value was 0.0015
-  double b = 1.2;    //Probability to detach from end of line
+  double x = this->system.diffusionRate;    //Diffusion Rate without neighbors. All values acceptable.
+  double y = this->system.bindingAffinity;    //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable. ("updates" / "updates2" was 0.2)
+  double z = this->system.seperationAffinity; ;    //Affinity to detach from cluster. (updates / updates2 was 0.8)
+  double a = this->system.convertToStable; //Old A value was 0.0015
+  double b = this->system.detachFromLine;   //Probability to detach from end of line
+
+/*
+  std::cout << "lambda " << lambda << std::endl;
+  std::cout << "diffusionRate " << x << std::endl;
+  std::cout << "bindingAffinity " << y << std::endl;
+  std::cout << "seperationAffinity " << z << std::endl;
+  std::cout << "convertToStable " << a << std::endl;
+  std::cout << "detachFromLine " << b << std::endl;
+  std::cout << std::endl;
+  */
 
   if (isContracted())
   {
@@ -970,10 +980,29 @@ bool CompressionParticle::checkBlueProp2(std::vector<int> S) const
   }
 }
 
-CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int numBlueParticles, unsigned int numGreenParticles, double lambda)
+CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int numBlueParticles,
+ unsigned int numGreenParticles, double lambda, double diffusionRate, 
+ double bindingAffinity, double seperationAffinity, double convertToStable,
+ double detachFromLine)
 {
-  Q_ASSERT(lambda > 1);
+  this->diffusionRate = diffusionRate;
+  this->bindingAffinity = bindingAffinity;
+  this->seperationAffinity = seperationAffinity;
+  this->convertToStable = convertToStable;
+  this->detachFromLine = detachFromLine;
 
+  /*
+  std::cout << "lambda " << lambda << std::endl;
+  std::cout << "diffusionRate " << diffusionRate<< std::endl;
+  std::cout << "bindingAffinity " << bindingAffinity << std::endl;
+  std::cout << "seperationAffinity " << seperationAffinity  << std::endl;
+  std::cout << "convertToStable " << convertToStable << std::endl;
+  std::cout << "detachFromLine " << detachFromLine<< std::endl;
+  std::cout << std::endl;
+  */
+
+  Q_ASSERT(lambda > 1);
+  //std::cout << "lambda " <<lambda <<std::endl;
   //  int numParticles = numBlueParticles + numRedParticles;
   //MichaelM added hexagon creation and random particle insertion similar to DiscoDemo but for CompressionParticles
 
@@ -1001,7 +1030,7 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
   while (numRedAdded < numRedParticles)
   {
     // First, choose an x and y position at random from the (i) and (ii) bounds.
-
+    //std::cout << "lambda " <<lambda <<std::endl;
     int x = randInt(-sideLen + 1, sideLen);
     int y = randInt(1, 2 * sideLen);
     Node node(x, y);
@@ -1704,7 +1733,7 @@ double MaxWidth::calculate() const
 {
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
   //std::cout << "NEW ROUND " << std::endl;
-  std::cout << "maxW: " << _system.maxWidth << std::endl;
+  //std::cout << "maxW: " << _system.maxWidth << std::endl;
   return _system.maxWidth;
 }
 
@@ -1717,6 +1746,6 @@ MaxHeight::MaxHeight(const QString name,
 double MaxHeight::calculate() const
 {
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
-  std::cout << "maxH: " << _system.maxHeight << std::endl;
+  //std::cout << "maxH: " << _system.maxHeight << std::endl;
   return _system.maxHeight;
 }

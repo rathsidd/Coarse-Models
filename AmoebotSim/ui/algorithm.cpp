@@ -152,7 +152,9 @@ const double detachFromLine) {
       emit log("Detach From Line must be > 0", true);
     }
     else {
-      emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles, numGreenParticles));
+      //emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles, numGreenParticles));
+      emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles, 
+      numGreenParticles, lambda, diffusionRate, bindingAffinity, seperationAffinity, convertToStable, detachFromLine));
     }
   }
 

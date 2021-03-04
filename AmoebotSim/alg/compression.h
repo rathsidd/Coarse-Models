@@ -140,7 +140,10 @@ class CompressionSystem : public AmoebotSystem {
   // generated surface (with no tunnels). Takes an optionally specified size
   // (#particles) and a bias parameter. A bias above 2 + sqrt(2) will provably
   // yield compression; a bias below 2.17 will provably yield expansion.
-  CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, unsigned int numGreenParticles = 15, double lambda = 4.0);
+  CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, 
+  unsigned int numGreenParticles = 15, double lambda = 4.0, double diffusionRate = 1.0, 
+  double bindingAffinity = 0.6, double seperationAffinity = 0.4, double convertToStable = 0.0015,
+  double detachFromLine = 1.2);
   int findGroup(CompressionParticle* particle);
   void allGroups();
   //std::vector<CompressionParticle> DFS(CompressionParticle &p);
