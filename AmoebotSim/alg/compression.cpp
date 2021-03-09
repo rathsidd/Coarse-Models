@@ -38,8 +38,6 @@ CompressionParticle::CompressionParticle(const Node head,
 
 void CompressionParticle::activate()
 {
-
-
   double x = this->system.diffusionRate;    //Diffusion Rate without neighbors. All values acceptable.
   double y = this->system.bindingAffinity;    //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable. ("updates" / "updates2" was 0.2)
   double z = this->system.seperationAffinity; ;    //Affinity to detach from cluster. (updates / updates2 was 0.8)
