@@ -72,23 +72,28 @@ void AmoebotSystem::remove(AmoebotParticle* particle) {
       std::map<Node, AmoebotParticle*>::iterator it;
       std::vector<AmoebotParticle*>::iterator it2;
       it = particleMap.find(particle->head);
-       particleMap.erase(it);
+      particleMap.erase(it);
+      // Shouldn't hurt to have this.
       activatedParticles.erase(particle);
-      /*it2 = std::find (particles.begin(), particles.end(), particle);
-      if (it2 != particles.end()) // == myVector.end() means the element was not found
-      particles.erase(it2);
-      */
-      particles.erase(std::remove(particles.begin(), particles.end(), particle), particles.end());
-      delete particle;
+      it2 = std::find (particles.begin(), particles.end(), particle);
+      if (it2 != particles.end()) // == particles.end() means the element was not found
+        particles.erase(it2);
+      
+      //particles.erase(std::remove(particles.begin(), particles.end(), particle), particles.end());
+      //delete particle;
     }
     else {
       std::map<Node, AmoebotParticle*>::iterator it;
+      std::vector<AmoebotParticle*>::iterator it2;
       it = particleMap.find(particle->head);
       particleMap.erase(it);
       it = particleMap.find(particle->tail());
       particleMap.erase(it);
       activatedParticles.erase(particle);
-      particles.erase(std::remove(particles.begin(), particles.end(), particle), particles.end());
+      it2 = std::find (particles.begin(), particles.end(), particle);
+      if (it2 != particles.end()) // == particles.end() means the element was not found
+        particles.erase(it2);
+      //particles.erase(std::remove(particles.begin(), particles.end(), particle), particles.end());
     }
   }
 }

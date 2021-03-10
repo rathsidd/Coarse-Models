@@ -979,7 +979,7 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
 
   // sideLen is now a var of the system
   //int sideLen = static_cast<int>(std::round(50));
-  this->sideLen = static_cast<int>(std::round(50)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
+  this->sideLen = static_cast<int>(std::round(10)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
   Node boundNode(0, 0);                             //perhaps make this a variable? to easily modify?
   for (int dir = 0; dir < 6; ++dir)
   {
@@ -1704,7 +1704,7 @@ double MaxWidth::calculate() const
 {
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
   //std::cout << "NEW ROUND " << std::endl;
-  std::cout << "maxW: " << _system.maxWidth << std::endl;
+  //std::cout << "maxW: " << _system.maxWidth << std::endl;
   return _system.maxWidth;
 }
 
@@ -1717,6 +1717,6 @@ MaxHeight::MaxHeight(const QString name,
 double MaxHeight::calculate() const
 {
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
-  std::cout << "maxH: " << _system.maxHeight << std::endl;
+  //std::cout << "maxH: " << _system.maxHeight << std::endl;
   return _system.maxHeight;
 }
