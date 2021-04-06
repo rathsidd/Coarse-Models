@@ -307,6 +307,7 @@ void CompressionParticle::activate()
   }
   // system.getCount("Surface Coverage").record(round(system.size()/((3*sqrt(3) * pow(50, 2))/2)));
   //(system).getClusters();
+  system.remove(this);
 }
 // end of activate
 
@@ -1576,16 +1577,10 @@ void DFS(Graph const &graph, int v, vector<bool> &discovered)
         }
       }*/
 
+
 bool CompressionSystem::hasTerminated() const
 {
-#ifdef QT_DEBUG
-  if (!isConnected(particles))
-  {
-    return true;
-  }
-#endif
-
-  return false;
+  return particles.size() == 0;
 }
 
 PerimeterMeasure::PerimeterMeasure(const QString name, const unsigned int freq,
