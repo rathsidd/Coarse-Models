@@ -143,7 +143,7 @@ class CompressionSystem : public AmoebotSystem {
   CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15, 
   unsigned int numGreenParticles = 15, double lambda = 4.0, double diffusionRate = 1.0, 
   double bindingAffinity = 0.6, double seperationAffinity = 0.4, double convertToStable = 0.0015,
-  double detachFromLine = 1.2);
+  double detachFromLine = 1.2, unsigned int adsorptionRate = 8000, unsigned int desorptionRate = 2000);
   int findGroup(CompressionParticle* particle);
   void allGroups();
   //std::vector<CompressionParticle> DFS(CompressionParticle &p);

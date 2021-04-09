@@ -38,6 +38,7 @@ CompressionParticle::CompressionParticle(const Node head,
 
 void CompressionParticle::activate()
 {
+  bool removeBool = false;
   double x = this->system.diffusionRate;    //Diffusion Rate without neighbors. All values acceptable.
   double y = this->system.bindingAffinity;    //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable. ("updates" / "updates2" was 0.2)
   double z = this->system.seperationAffinity; ;    //Affinity to detach from cluster. (updates / updates2 was 0.8)
@@ -287,7 +288,7 @@ void CompressionParticle::activate()
 
   if (system.getCount("# Activations")._value < 1000000000)
   {
-    if (system.getCount("# Activations")._value % 8000 == 0)
+    if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0)
     {
       //int sideLen = system.sideLen;//static_cast<int>(std::round(5));
 
@@ -304,10 +305,27 @@ void CompressionParticle::activate()
         //nodesOccupied++;
       }
     }
+    if (system.getCount("# Activations")._value % this->system.desorptionRate == 0)
+    {
+      bool noNbrs = true;
+      for (int j = 0; j < 6; j++)
+      {
+        if (this->hasNbrAtLabel(j))
+        {
+          noNbrs = false;
+        }
+        if((this->_state != State::Black) && noNbrs) {
+          removeBool = true;
+        }
+      }
+    }
   }
   // system.getCount("Surface Coverage").record(round(system.size()/((3*sqrt(3) * pow(50, 2))/2)));
   //(system).getClusters();
-  system.remove(this);
+  //system.remove(this);
+  if(removeBool) {
+    system.remove(this);
+  }
 }
 // end of activate
 
@@ -983,13 +1001,15 @@ bool CompressionParticle::checkBlueProp2(std::vector<int> S) const
 CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int numBlueParticles,
  unsigned int numGreenParticles, double lambda, double diffusionRate, 
  double bindingAffinity, double seperationAffinity, double convertToStable,
- double detachFromLine)
+ double detachFromLine, unsigned int adsorptionRate, unsigned int desorptionRate)
 {
   this->diffusionRate = diffusionRate;
   this->bindingAffinity = bindingAffinity;
   this->seperationAffinity = seperationAffinity;
   this->convertToStable = convertToStable;
   this->detachFromLine = detachFromLine;
+  this->adsorptionRate = adsorptionRate;
+  this->desorptionRate = desorptionRate;
 
   /*
   std::cout << "lambda " << lambda << std::endl;
