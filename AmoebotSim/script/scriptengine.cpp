@@ -44,3 +44,4 @@ void ScriptEngine::runScript(const QString scriptFilePath) {
 
   engine.evaluate(script);
 }
+
