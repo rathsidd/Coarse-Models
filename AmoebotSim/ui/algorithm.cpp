@@ -118,12 +118,14 @@ CompressionAlg::CompressionAlg() : Algorithm("Compression", "compression") {
   addParameter("Separation Affinity", "0.4");
   addParameter("Convert to Stable", "0.0015");
   addParameter("Detach from Line", "1.2");
+  addParameter("Adsorption rate ", "8000");
+  addParameter("Desorption rate ", "2000");
 }
 
 void CompressionAlg::instantiate(const int numRedParticles, const int numBlueParticles, 
 const int numGreenParticles, const double lambda, const double diffusionRate, 
 const double bindingAffinity, const double seperationAffinity, const double convertToStable,
-const double detachFromLine) {
+const double detachFromLine, const int adsorptionRate, const int desorptionRate) {
     if (numRedParticles <= 0) {
       emit log("# red particles must be > 0", true);
     }
@@ -151,10 +153,17 @@ const double detachFromLine) {
     else if (detachFromLine <= 0) {
       emit log("Detach From Line must be > 0", true);
     }
+    else if (adsorptionRate <= 0) {
+      emit log("adsorption rate must be > 0", true);
+    }
+    else if (desorptionRate <= 0) {
+      emit log("desorption rate must be > 0", true);
+    }
     else {
       //emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles, numGreenParticles));
       emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles, 
-      numGreenParticles, lambda, diffusionRate, bindingAffinity, seperationAffinity, convertToStable, detachFromLine));
+      numGreenParticles, lambda, diffusionRate, bindingAffinity, seperationAffinity, 
+      convertToStable, detachFromLine, adsorptionRate, desorptionRate));
     }
   }
 

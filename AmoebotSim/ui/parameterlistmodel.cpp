@@ -91,7 +91,8 @@ void ParameterListModel::createSystem(QString algName) {
         //instantiate(params[0].toInt(), params[1].toInt(), params[2].toDouble());
         instantiate(params[0].toInt(), params[1].toInt(), params[2].toInt(),
         params[3].toDouble(), params[4].toDouble(), params[5].toDouble(), 
-        params[6].toDouble(), params[7].toDouble(), params[8].toDouble());
+        params[6].toDouble(), params[7].toDouble(), params[8].toDouble(), 
+        params[9].toInt(), params[10].toInt());
   } else if (signature == "infobjcoating") {
     dynamic_cast<InfObjCoatingAlg*>(alg)->
         instantiate(params[0].toInt(), params[1].toDouble());

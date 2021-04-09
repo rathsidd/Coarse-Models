@@ -37,6 +37,8 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   double seperationAffinity;
   double convertToStable;
   double detachFromLine;
+  unsigned int adsorptionRate;
+  unsigned int desorptionRate;
 
   // Deletes the particles, objects, and metrics in this system before
   // destructing the system.
