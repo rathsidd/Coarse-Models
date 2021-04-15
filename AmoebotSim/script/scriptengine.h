@@ -16,22 +16,22 @@
 class ScriptInterface;
 
 class ScriptEngine : public QObject {
-  Q_OBJECT
+    Q_OBJECT
 
- public:
-  ScriptEngine(Simulator& sim, VisItem* vis = nullptr,
-               AlgorithmList* algList = nullptr);
+public:
+    ScriptEngine(Simulator& sim, VisItem* vis = nullptr,
+                 AlgorithmList* algList = nullptr);
 
- signals:
-  void log(const QString msg, bool error = false);
+    signals:
+            void log(const QString msg, bool error = false);
 
- public slots:
-  void runScript(const QString scriptFilePath);
+public slots:
+            void runScript(const QString scriptFilePath);
 
- private:
-  QJSEngine engine;
-  ScriptInterface* scriptInterface;
-  AlgorithmList* _algList;
+private:
+    QJSEngine engine;
+    ScriptInterface* scriptInterface;
+    AlgorithmList* _algList;
 };
 
 #endif  // AMOEBOTSIM_SCRIPT_SCRIPTENGINE_H_
