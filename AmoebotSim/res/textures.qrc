@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>textures/grid.png</file>
-        <file>textures/particle.png</file>
-    </qresource>
-</RCC>
