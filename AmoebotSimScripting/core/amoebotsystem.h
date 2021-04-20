@@ -31,7 +31,12 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   // counts.
   AmoebotSystem();
   std::vector<Measure*> _measures;
-    int sideLen;
+  unsigned int numRedParticles;
+  unsigned int numBlueParticles;
+  unsigned int numGreenParticles;
+  bool removeBool;
+
+  int sideLen;
   double diffusionRate;
   double bindingAffinity;
   double seperationAffinity;
