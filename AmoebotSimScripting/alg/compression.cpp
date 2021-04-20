@@ -38,7 +38,7 @@ CompressionParticle::CompressionParticle(const Node head,
 
 void CompressionParticle::activate()
 {
-  bool removeBool = false;
+  bool removeNow = false;
   double x = this->system.diffusionRate;    //Diffusion Rate without neighbors. All values acceptable.
   double y = this->system.bindingAffinity;    //Binding Affinity when encountering new neighbors. ALl values above 0.5 are reasonable. ("updates" / "updates2" was 0.2)
   double z = this->system.seperationAffinity; ;    //Affinity to detach from cluster. (updates / updates2 was 0.8)
@@ -300,22 +300,152 @@ void CompressionParticle::activate()
       if (0 < x + y && x + y < 2 * system.sideLen && system.particleMap.find(node) == system.particleMap.end())
       {
         //if (DiscoDemoSystem::getClusters() > 1) {
-        system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-        //system.nodesOccupied++;
-        //nodesOccupied++;
+        int typeOfParicles = 0;
+        bool canInsertRed = false;
+        bool canInsertBlue = false;
+        bool canInsertGreen = false;
+        if(system.numRedParticles > 0) {
+            typeOfParicles++;
+            canInsertRed = true;
+        }
+
+        if(system.numBlueParticles > 0) {
+            typeOfParicles++;
+            canInsertBlue = true;
+        }
+
+        if(system.numGreenParticles > 0) {
+            typeOfParicles++;
+            canInsertGreen = true;
+        }
+        int randInteger = randInt(1, (typeOfParicles+1));
+        
+        if(typeOfParicles == 3) {
+          if(randInteger == 1) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+          }
+          else if(randInteger == 2) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+          }
+          else{
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+          }
+        }
+        if(typeOfParicles ==2) {
+          if(canInsertRed && canInsertBlue) {
+            if(randInteger == 1) {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+            }
+            if(randInteger == 2) {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+            }
+          }
+          if (canInsertRed && canInsertGreen) {
+            if(randInteger == 1) {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+            }
+            if(randInteger == 2) {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+            }
+          }
+          if(canInsertBlue && canInsertGreen) {
+            if(randInteger == 1) {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+            }
+            if(randInteger == 2) {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+            }
+          }
+        }
+        if(typeOfParicles == 1) {
+          if(canInsertRed) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+          }
+          if(canInsertBlue) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+          }
+          if(canInsertGreen) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+          }
+        }
+        /*
+        if(canInsertRed) {
+          if(randInteger == 1) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+            canInsertRed = false;
+          }
+        }
+        else if (canInsertBlue) {
+          if(randInteger == 1) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+            canInsertBlue = false;
+          }
+        }
+        else if(canInsertGreen) {
+          if(randInteger == 1) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+            canInsertGreen = false;
+          }
+        }
+        else {
+          //do nothing
+        }
+
+        if(canInsertRed) {
+          if(randInteger == 2) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+            canInsertRed = false;
+          }
+        }
+        else if (canInsertBlue) {
+          if(randInteger == 2) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+            canInsertBlue = false;
+          }
+        }
+        else if(canInsertGreen) {
+          if(randInteger == 2) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+            canInsertGreen = false;
+          }
+        }*/
       }
     }
     if (system.getCount("# Activations")._value % this->system.desorptionRate == 0)
     {
-      bool noNbrs = true;
+      int numNbrs = 0;
       for (int j = 0; j < 6; j++)
       {
         if (this->hasNbrAtLabel(j))
         {
-          noNbrs = false;
+          numNbrs++;
         }
-        if((this->_state != State::Black) && noNbrs) {
-          removeBool = true;
+      }
+      if(this->_state == State::Black) {
+        system.removeBool == true;
+      }
+      else {
+        double randDoubleZeroToOne = rand() / (RAND_MAX + 1.0);
+        if(numNbrs == 0) {
+          removeNow = true;
+        }
+        else if (numNbrs == 1 && randDoubleZeroToOne < 0.8571) {
+          removeNow = true;
+        }
+        else if (numNbrs == 2 && randDoubleZeroToOne <  0.7143) {
+          removeNow = true;
+        }
+        else if (numNbrs == 3 && randDoubleZeroToOne < 0.5714) {
+          removeNow = true;
+        }
+        else if (numNbrs == 4 && randDoubleZeroToOne < 0.4285) {
+          removeNow = true;
+        }
+        else if (numNbrs == 5 && randDoubleZeroToOne < 0.2857) {
+          removeNow = true;
+        }
+        else if (numNbrs == 6 && randDoubleZeroToOne < 0.1429) {
+          removeNow = true;
         }
       }
     }
@@ -323,8 +453,14 @@ void CompressionParticle::activate()
   // system.getCount("Surface Coverage").record(round(system.size()/((3*sqrt(3) * pow(50, 2))/2)));
   //(system).getClusters();
   //system.remove(this);
-  if(removeBool) {
+  if(removeNow) {
     system.remove(this);
+  }
+  else {
+    if(system.removeBool && this->_state != State::Black) {
+      system.removeBool = false;
+      system.remove(this);
+    }
   }
 }
 // end of activate
@@ -1003,6 +1139,10 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
  double bindingAffinity, double seperationAffinity, double convertToStable,
  double detachFromLine, unsigned int adsorptionRate, unsigned int desorptionRate)
 {
+  this->removeBool = false;
+  this->numRedParticles = numRedParticles;
+  this->numBlueParticles = numBlueParticles;
+  this->numGreenParticles = numGreenParticles;
   this->diffusionRate = diffusionRate;
   this->bindingAffinity = bindingAffinity;
   this->seperationAffinity = seperationAffinity;
