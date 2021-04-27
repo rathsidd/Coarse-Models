@@ -288,18 +288,108 @@ void CompressionParticle::activate()
 
   if (system.getCount("# Activations")._value < 1000000000)
   {
-    if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0)
-    {
-      //int sideLen = system.sideLen;//static_cast<int>(std::round(5));
+      if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0) {
+        int sideLen = static_cast<int>(50);
+        int x = randInt(-sideLen + 1, sideLen);
+        int y = randInt(1, 2 * sideLen);
+        Node node(x, y);
+        //std::set<Node> occupied;
+        // If the node satisfies (iii) and is unoccupied, place a particle there.
+        if (0 < x + y && x + y < 2 * sideLen && system.particleMap.find(node) == system.particleMap.end()) {
+          int typeOfParicles = 0;
+          bool canInsertRed = false;
+          bool canInsertBlue = false;
+          bool canInsertGreen = false;
+          if(system.numRedParticles > 0) {
+              typeOfParicles++;
+              canInsertRed = true;
+          }
 
-      int x = randInt(-system.sideLen + 1, system.sideLen);
-      int y = randInt(1, 2 * system.sideLen);
+          if(system.numBlueParticles > 0) {
+              typeOfParicles++;
+              canInsertBlue = true;
+          }
+
+          if(system.numGreenParticles > 0) {
+              typeOfParicles++;
+              canInsertGreen = true;
+          }
+          int randInteger = randInt(1, (typeOfParicles+1));
+          //std::cout << "typeOfParicles  " << typeOfParicles << std::endl;
+          //std::cout << "randInteger  " << randInteger << std::endl;
+          
+          if(typeOfParicles == 3) {
+          if(randInteger == 1) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+          }
+          else if(randInteger == 2) {
+            //std::cout << "333333333333333333 " << std::endl;
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+          }
+          else{
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+          }
+        } //end of if 3 types
+
+        if(typeOfParicles ==2) {
+          if(canInsertRed && canInsertBlue) {
+            if(randInteger == 1) {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+            }
+            else {
+              //std::cout << "2222222222222222 " << std::endl;
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+            }
+          }
+          if (canInsertRed && canInsertGreen) {
+            if(randInteger == 1) {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+            }
+            else {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+            }
+          }
+          if(canInsertBlue && canInsertGreen) {
+            if(randInteger == 1) {
+              //std::cout << "222222222222222222 " << std::endl;
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+            }
+            else {
+              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+            }
+          }
+        } // end of if 2 types
+
+        if(typeOfParicles == 1) {
+          //std::cout << "canInsertRed " << canInsertRed <<std::endl;
+          //std::cout << "canInsertBlue " << canInsertBlue <<std::endl;
+          //std::cout << "canInsertGreen " << canInsertGreen <<std::endl;
+          if(canInsertRed) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+          }
+          else if(canInsertBlue) {
+            //std::cout << "11111111111111111111 " << std::endl;
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+          }
+          else if(canInsertGreen) {
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+          }
+        } // end of if 1 type
+          //system.insert(new CompressionParticle(node, -1, randDir(), system, lambda, CompressionParticle::State::Red));
+          //occupied.insert(node);
+      }
+    }
+    /*if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0)
+    {
+      int sideLen = static_cast<int>(std::round(50));
+
+      int x = randInt(sideLen + 1, sideLen);
+      int y = randInt(1, 2 * sideLen);
       Node node(x, y);
 
       // If the node satisfies (iii) and is unoccupied, place a particle there.
-      if (0 < x + y && x + y < 2 * system.sideLen && system.particleMap.find(node) == system.particleMap.end())
+      if (0 < x + y && x + y < 2 * sideLen && system.particleMap.find(node) == system.particleMap.end())
       {
-        //if (DiscoDemoSystem::getClusters() > 1) {
         int typeOfParicles = 0;
         bool canInsertRed = false;
         bool canInsertBlue = false;
@@ -368,49 +458,8 @@ void CompressionParticle::activate()
             system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
           }
         }
-        /*
-        if(canInsertRed) {
-          if(randInteger == 1) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-            canInsertRed = false;
-          }
-        }
-        else if (canInsertBlue) {
-          if(randInteger == 1) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
-            canInsertBlue = false;
-          }
-        }
-        else if(canInsertGreen) {
-          if(randInteger == 1) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
-            canInsertGreen = false;
-          }
-        }
-        else {
-          //do nothing
-        }
-
-        if(canInsertRed) {
-          if(randInteger == 2) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-            canInsertRed = false;
-          }
-        }
-        else if (canInsertBlue) {
-          if(randInteger == 2) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
-            canInsertBlue = false;
-          }
-        }
-        else if(canInsertGreen) {
-          if(randInteger == 2) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
-            canInsertGreen = false;
-          }
-        }*/
       }
-    }
+    }*/
     if (system.getCount("# Activations")._value % this->system.desorptionRate == 0)
     {
       int numNbrs = 0;
@@ -1167,8 +1216,8 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
   //MichaelM added hexagon creation and random particle insertion similar to DiscoDemo but for CompressionParticles
 
   // sideLen is now a var of the system
-  //int sideLen = static_cast<int>(std::round(50));
-  this->sideLen = static_cast<int>(std::round(50)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
+  int sideLen = static_cast<int>(std::round(50));
+  //this->sideLen = static_cast<int>(std::round(50)); //MichaelM changed 1.4 to 3.0 (control hexagon size)
   Node boundNode(0, 0);                             //perhaps make this a variable? to easily modify?
   for (int dir = 0; dir < 6; ++dir)
   {
@@ -1791,8 +1840,8 @@ double SurfaceArea::calculate() const
       nodesOccupied++;
     }
   }
-
-  return ((double)(nodesOccupied)*100.0) / (3.0005 * pow(_system.sideLen, 2) - 3.0246 * _system.sideLen + 1.0154);
+  int sideLen = static_cast<int>(std::round(50));
+  return ((double)(nodesOccupied)*100.0) / (3.0005 * pow(sideLen, 2) - 3.0246 * sideLen + 1.0154);
 }
 
 SurfaceAreaNumeratorParticles::SurfaceAreaNumeratorParticles(const QString name, const unsigned int freq,
@@ -1817,8 +1866,8 @@ double SurfaceAreaNumeratorParticles::calculate() const
     particles++;
     //}
   }
-
-  return ((double)(particles)*100.0) / (3.0005 * pow(_system.sideLen, 2) - 3.0246 * _system.sideLen + 1.0154);
+  int sideLen = static_cast<int>(std::round(50));
+  return ((double)(particles)*100.0) / (3.0005 * pow(sideLen, 2) - 3.0246 * sideLen + 1.0154);
 }
 
 PercentOrdering::PercentOrdering(const QString name, const unsigned int freq,
