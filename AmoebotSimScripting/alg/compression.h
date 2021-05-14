@@ -36,6 +36,7 @@ class CompressionParticle : public AmoebotParticle {
   friend class AvgWidth;
   friend class MaxHeight;
   friend class MaxWidth;
+  friend class MovesOverActivations;
 
   enum class State {
       Red,
@@ -134,6 +135,7 @@ class CompressionSystem : public AmoebotSystem {
   friend class AvgWidth;
   friend class MaxHeight;
   friend class MaxWidth;
+  friend class MovesOverActivations;
 
  public:
   // Constructs a system of CompressionParticles connected to a randomly
@@ -277,4 +279,16 @@ class MaxHeight : public Measure {
   CompressionSystem& _system;
 };
 
+class MovesOverActivations : public Measure {
+ public:
+  // Constructs a SurfaceArea
+  MovesOverActivations(const QString name, const unsigned int freq,
+                    CompressionSystem& system);
+
+  // Calculated the percentage of surface area covered.
+  double calculate() const final;
+
+ protected:
+  CompressionSystem& _system;
+};
 #endif  // AMOEBOTSIM_ALG_COMPRESSION_H_

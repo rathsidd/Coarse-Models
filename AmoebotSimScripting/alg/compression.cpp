@@ -296,6 +296,16 @@ void CompressionParticle::activate()
         //std::set<Node> occupied;
         // If the node satisfies (iii) and is unoccupied, place a particle there.
         if (0 < x + y && x + y < 2 * sideLen && system.particleMap.find(node) == system.particleMap.end()) {
+          int randInteger = randInt(0, 10);
+          //std::cout <<randInteger << std::endl;
+          if(randInteger < 8) {
+            //std::cout <<"red" << std::endl;
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+          } else {
+            //std::cout <<"blue" << std::endl;
+            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+          }
+          /*
           int typeOfParicles = 0;
           bool canInsertRed = false;
           bool canInsertBlue = false;
@@ -377,89 +387,9 @@ void CompressionParticle::activate()
         } // end of if 1 type
           //system.insert(new CompressionParticle(node, -1, randDir(), system, lambda, CompressionParticle::State::Red));
           //occupied.insert(node);
-      }
+      */}
     }
-    /*if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0)
-    {
-      int sideLen = static_cast<int>(std::round(50));
-
-      int x = randInt(sideLen + 1, sideLen);
-      int y = randInt(1, 2 * sideLen);
-      Node node(x, y);
-
-      // If the node satisfies (iii) and is unoccupied, place a particle there.
-      if (0 < x + y && x + y < 2 * sideLen && system.particleMap.find(node) == system.particleMap.end())
-      {
-        int typeOfParicles = 0;
-        bool canInsertRed = false;
-        bool canInsertBlue = false;
-        bool canInsertGreen = false;
-        if(system.numRedParticles > 0) {
-            typeOfParicles++;
-            canInsertRed = true;
-        }
-
-        if(system.numBlueParticles > 0) {
-            typeOfParicles++;
-            canInsertBlue = true;
-        }
-
-        if(system.numGreenParticles > 0) {
-            typeOfParicles++;
-            canInsertGreen = true;
-        }
-        int randInteger = randInt(1, (typeOfParicles+1));
-        
-        if(typeOfParicles == 3) {
-          if(randInteger == 1) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-          }
-          else if(randInteger == 2) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
-          }
-          else{
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
-          }
-        }
-        if(typeOfParicles ==2) {
-          if(canInsertRed && canInsertBlue) {
-            if(randInteger == 1) {
-              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-            }
-            if(randInteger == 2) {
-              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
-            }
-          }
-          if (canInsertRed && canInsertGreen) {
-            if(randInteger == 1) {
-              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-            }
-            if(randInteger == 2) {
-              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
-            }
-          }
-          if(canInsertBlue && canInsertGreen) {
-            if(randInteger == 1) {
-              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
-            }
-            if(randInteger == 2) {
-              system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
-            }
-          }
-        }
-        if(typeOfParicles == 1) {
-          if(canInsertRed) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-          }
-          if(canInsertBlue) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
-          }
-          if(canInsertGreen) {
-            system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
-          }
-        }
-      }
-    }*/
+ 
     if (system.getCount("# Activations")._value % this->system.desorptionRate == 0)
     {
       int numNbrs = 0;
@@ -1303,6 +1233,7 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
   _measures.push_back(new AvgWidth("Avg Width", 1, *this));
   _measures.push_back(new MaxHeight("Max Height", 1, *this));
   _measures.push_back(new MaxWidth("Max Width", 1, *this));
+  _measures.push_back(new MovesOverActivations("Moves/Activations", 1, *this));
   //_counts.push_back(new Count("Surface Coverage"));
 
   //totalNodes = (3*sqrt(3) * pow(50, 2))/2;  // Hexagon area = (3*√3 *(sideLen)^2)/ 2
@@ -1951,4 +1882,15 @@ double MaxHeight::calculate() const
   std::vector<std::vector<CompressionParticle>> clusters = _system.getClusters();
   //std::cout << "maxH: " << _system.maxHeight << std::endl;
   return _system.maxHeight;
+}
+
+MovesOverActivations::MovesOverActivations(const QString name,
+                                     const unsigned int freq,
+                                     CompressionSystem &system)
+    : Measure(name, freq),
+      _system(system) {}
+double MovesOverActivations::calculate() const
+{
+  //std::cout<< (double)_system.getCount("# Moves")._value/_system.getCount("# Activations")._value <<std::endl;
+  return (double)_system.getCount("# Moves")._value/_system.getCount("# Activations")._value;
 }
