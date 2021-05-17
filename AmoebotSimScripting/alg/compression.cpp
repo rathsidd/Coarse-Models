@@ -67,7 +67,7 @@ void CompressionParticle::activate()
 
       if (_state == State::Red)
       {
-        if (q < 0.4032)
+        if (q < 0.000037135)
         {
           _state = State::Blue;
         }
@@ -78,7 +78,7 @@ void CompressionParticle::activate()
       }
       else if (_state == State::Blue)
       {
-        if (q < 0.5968)
+        if (q < 0.999962865)
         {
           _state = State::Red;
         }
@@ -89,17 +89,16 @@ void CompressionParticle::activate()
       }
       if (_state == State::Black && !hasRBNbrInLine() && !stuckInRedLine())
       {
-        if (q < 0.5968)
+        if (q < 0.999962865)
         {
           _state = State::Red;
         }
-        if (q > 0.5968)
+        if (q > 0.999962865)
         {
           _state = State::Blue;
         }
       }
     }
-
     //  //  //      FOR WT-GRBP5-8A     //      //      //
 
     /* if (!hasRBNbrInLine() && !stuckInRedLine()) { //REMOVED && _state != State::Black &&
@@ -296,9 +295,9 @@ void CompressionParticle::activate()
         //std::set<Node> occupied;
         // If the node satisfies (iii) and is unoccupied, place a particle there.
         if (0 < x + y && x + y < 2 * sideLen && system.particleMap.find(node) == system.particleMap.end()) {
-          int randInteger = randInt(0, 10);
+          int randInteger = randInt(0, 100000);
           //std::cout <<randInteger << std::endl;
-          if(randInteger < 8) {
+          if(randInteger < 99996) {
             //std::cout <<"red" << std::endl;
             system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
           } else {
