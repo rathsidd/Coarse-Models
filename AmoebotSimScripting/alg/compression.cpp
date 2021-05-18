@@ -180,7 +180,13 @@ void CompressionParticle::activate()
 
     if (!hasRBNbrInLine() && q < 1 && _state != State::Black)
     { //Left out "&& redNbrCount(uniqueLabels()) == 0"
-      _direction = rand() % 3;
+      int randInteger = randInt(0, 10);
+      if(randInteger ==0) {
+        _direction = (_direction + 1) %3;
+      }
+      else if(randInteger ==1) {
+        _direction = (_direction + 2) %3;
+      }
     }
 
     if (canExpand(expandDir) && !hasExpNbr())
