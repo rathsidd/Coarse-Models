@@ -60,23 +60,23 @@ void CompressionParticle::activate()
     int dir = (int)headMarkDir();
     //std::cout <<dir <<std::endl;
     int expandDir = randDir(); //Store a potential direction to expand into (for use later)
-    int randInteger = randInt(0, 10);
-    if(randInteger <= 2) {
+    int randInteger = randInt(0, 100);
+    if(randInteger <= 32) {
       expandDir = dir;
     }
-    else if (randInteger <= 5){
+    else if (randInteger <= 75){
       expandDir = dir + 3;
     }
-    else if(randInteger == 6) {
+    else if(randInteger <= 80) {
       expandDir = dir + 1;
     }
-    else if(randInteger == 7) {
+    else if(randInteger <= 85) {
       expandDir = dir + 2;
     }
-    else if(randInteger == 8) {
+    else if(randInteger <= 90) {
       expandDir = (dir + 4)%6;
     }
-    else if(randInteger == 9) {
+    else if(randInteger <= 95) {
       expandDir = (dir + 5)%6;
     }
     //std::cout <<expandDir <<std::endl;
@@ -180,11 +180,11 @@ void CompressionParticle::activate()
 
     if (!hasRBNbrInLine() && q < 1 && _state != State::Black)
     { //Left out "&& redNbrCount(uniqueLabels()) == 0"
-      int randInteger = randInt(0, 10);
-      if(randInteger ==0) {
+      int randInteger = randInt(0, 100);
+      if(randInteger <=5) {
         _direction = (_direction + 1) %3;
       }
-      else if(randInteger ==1) {
+      else if(randInteger <=10) {
         _direction = (_direction + 2) %3;
       }
     }
