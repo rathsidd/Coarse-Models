@@ -57,7 +57,29 @@ void CompressionParticle::activate()
 
   if (isContracted())
   {
+    int dir = (int)headMarkDir();
+    //std::cout <<dir <<std::endl;
     int expandDir = randDir(); //Store a potential direction to expand into (for use later)
+    int randInteger = randInt(0, 10);
+    if(randInteger <= 2) {
+      expandDir = dir;
+    }
+    else if (randInteger <= 5){
+      expandDir = dir + 3;
+    }
+    else if(randInteger == 6) {
+      expandDir = dir + 1;
+    }
+    else if(randInteger == 7) {
+      expandDir = dir + 2;
+    }
+    else if(randInteger == 8) {
+      expandDir = (dir + 4)%6;
+    }
+    else if(randInteger == 9) {
+      expandDir = (dir + 5)%6;
+    }
+    //std::cout <<expandDir <<std::endl;
     q = randDouble(0, 1);
 
     //      //      //      FOR WT-GRBP5        //      //      //
