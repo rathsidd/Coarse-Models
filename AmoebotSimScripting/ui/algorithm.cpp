@@ -135,6 +135,7 @@ CompressionAlg::CompressionAlg() : Algorithm("Compression", "compression") {
   addParameter("# Red Particles", "15");
   addParameter("# Blue Particles", "15");
   addParameter("# Green Particles", "15");
+  addParameter("# Purple Particles", "15");
   addParameter("Lambda", "4.0");
   addParameter("Diffusion Rate", "1.0");
   addParameter("Binding Affinity", "0.6");
@@ -146,7 +147,7 @@ CompressionAlg::CompressionAlg() : Algorithm("Compression", "compression") {
 }
 
 void CompressionAlg::instantiate(const int numRedParticles, const int numBlueParticles,
-const int numGreenParticles, const double lambda, const double diffusionRate,
+const int numGreenParticles, const int numPurpleParticles, const double lambda, const double diffusionRate,
 const double bindingAffinity, const double seperationAffinity, const double convertToStable,
 const double detachFromLine, const int adsorptionRate, const int desorptionRate) {
     if (numRedParticles <= 0) {
@@ -157,6 +158,9 @@ const double detachFromLine, const int adsorptionRate, const int desorptionRate)
     }
     if (numGreenParticles < 0) {
       emit log("# green particles must be > 0 or = 0", true);
+    }
+    if (numPurpleParticles < 0) {
+      emit log("# purple particles must be > 0 or = 0", true);
     }
     else if (lambda <= 0) {
       emit log("lambda must be > 0", true);
@@ -185,7 +189,7 @@ const double detachFromLine, const int adsorptionRate, const int desorptionRate)
     else {
       //emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles, numGreenParticles));
       emit setSystem(std::make_shared<CompressionSystem>(numRedParticles, numBlueParticles,
-      numGreenParticles, lambda, diffusionRate, bindingAffinity, seperationAffinity,
+      numGreenParticles, numPurpleParticles, lambda, diffusionRate, bindingAffinity, seperationAffinity,
       convertToStable, detachFromLine, adsorptionRate, desorptionRate));
     }
   }

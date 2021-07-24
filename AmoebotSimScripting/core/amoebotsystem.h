@@ -34,6 +34,7 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   unsigned int numRedParticles;
   unsigned int numBlueParticles;
   unsigned int numGreenParticles;
+  unsigned int numPurpleParticles;
   bool removeBool;
 
   int sideLen;

@@ -42,6 +42,7 @@ class CompressionParticle : public AmoebotParticle {
       Red,
       Blue,
       Green,
+      Purple,
       Black,
   };
 
@@ -143,7 +144,7 @@ class CompressionSystem : public AmoebotSystem {
   // (#particles) and a bias parameter. A bias above 2 + sqrt(2) will provably
   // yield compression; a bias below 2.17 will provably yield expansion.
   CompressionSystem(unsigned int numRedParticles = 15, unsigned int numBlueParticles = 15,
-  unsigned int numGreenParticles = 15, double lambda = 4.0, double diffusionRate = 1.0,
+  unsigned int numGreenParticles = 15, unsigned int numPurpleParticles = 15, double lambda = 4.0, double diffusionRate = 1.0,
   double bindingAffinity = 0.6, double seperationAffinity = 0.4, double convertToStable = 0.0005,
   double detachFromLine = 1.2, unsigned int adsorptionRate = 2000, unsigned int desorptionRate = 8000);
   int findGroup(CompressionParticle* particle);

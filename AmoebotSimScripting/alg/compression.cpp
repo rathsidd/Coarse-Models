@@ -62,7 +62,7 @@ void CompressionParticle::activate()
 
     //      //      //      FOR WT-GRBP5        //      //      //
 
-    if (!hasRBNbrInLine() && !stuckInRedLine())
+ /*   if (!hasRBNbrInLine() && !stuckInRedLine())
     { //REMOVED && _state != State::Black &&
 
       if (_state == State::Red)
@@ -99,9 +99,10 @@ void CompressionParticle::activate()
         }
       }
     }
-    //  //  //      FOR WT-GRBP5-8A     //      //      //
+    */
+    //  //  //      FOR WT-GRBP5-M2     //      //      //
 
-    /* if (!hasRBNbrInLine() && !stuckInRedLine()) { //REMOVED && _state != State::Black &&
+     if (!hasRBNbrInLine() && !stuckInRedLine()) { //REMOVED && _state != State::Black &&
 
      if (_state == State::Red) {
          if (q < 0.5) {
@@ -110,7 +111,7 @@ void CompressionParticle::activate()
      }
      }
      else if (_state == State::Blue) {
-         if (q < 0.333) {
+         if (q < 0.33) {
              _state = State::Green;
          }
          if (q > 0.333 && q < 0.666) {
@@ -121,24 +122,40 @@ void CompressionParticle::activate()
          }
 
      }
+
      else if (_state == State::Green) {
+         if (q < 0.33) {
+             _state = State::Purple;
+         }
+         if (q > 0.333 && q < 0.666) {
+             _state = State::Green;
+         }
+         if (q > 0.666) {
+             _state = State::Blue;
+         }
+
+     }
+
+     else if (_state == State::Purple) {
               if (q < 0.5) {
-                  _state = State::Green;
-              } else { _state = State::Blue;
+                  _state = State::Purple;
+              } else { _state = State::Green;
           }
           }
 
      if (_state == State::Black && !hasRBNbrInLine() && !stuckInRedLine()) {
-         if (q < 0.33) {
+         if (q < 0.25) {
              _state = State::Red;
-         } if (q > 0.33 && q < 0.66) {
+         } if (q > 0.25 && q < 0.5) {
              _state = State::Blue;
-         } if (q > 0.66) {
+         } if (q > 0.5 && q < 0.75) {
              _state = State::Green;
+         } if (q > 0.75) {
+             _state = State::Purple;
          }
      }
    }
-*/
+
 
     if (stuckInRedLine() && _state == State::Red)
     {
@@ -297,12 +314,20 @@ void CompressionParticle::activate()
         if (0 < x + y && x + y < 2 * sideLen && system.particleMap.find(node) == system.particleMap.end()) {
           int randInteger = randInt(0, 100000);
           //std::cout <<randInteger << std::endl;
-          if(randInteger < 99996) {
+          if(randInteger < 25000) {
             //std::cout <<"red" << std::endl;
             system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-          } else {
+          } else if (randInteger > 25000 && randInteger < 50000) {
             //std::cout <<"blue" << std::endl;
             system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+          }
+            else if (randInteger > 50000 && randInteger < 75000) {
+                      //std::cout <<"blue" << std::endl;
+                      system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
+           }
+          else if (randInteger > 75000) {
+                      //std::cout <<"blue" << std::endl;
+                      system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Purple));
           }
           /*
           int typeOfParicles = 0;
@@ -456,6 +481,10 @@ int CompressionParticle::headMarkColor() const
   else if (_state == State::Green)
   {
     return 0x00ff00;
+  }
+  else if (_state == State::Purple)
+  {
+    return 0xff00ff;
   }
   else if (_state == State::Black)
   {
@@ -1113,7 +1142,7 @@ bool CompressionParticle::checkBlueProp2(std::vector<int> S) const
 }
 
 CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int numBlueParticles,
- unsigned int numGreenParticles, double lambda, double diffusionRate,
+ unsigned int numGreenParticles, unsigned int numPurpleParticles, double lambda, double diffusionRate,
  double bindingAffinity, double seperationAffinity, double convertToStable,
  double detachFromLine, unsigned int adsorptionRate, unsigned int desorptionRate)
 {
@@ -1121,6 +1150,7 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
   this->numRedParticles = numRedParticles;
   this->numBlueParticles = numBlueParticles;
   this->numGreenParticles = numGreenParticles;
+  this->numPurpleParticles = numPurpleParticles;
   this->diffusionRate = diffusionRate;
   this->bindingAffinity = bindingAffinity;
   this->seperationAffinity = seperationAffinity;
@@ -1200,6 +1230,27 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
         // this->nodesOccupied++;
         occupied.insert(blueNode);
         numBlueAdded++;
+      }
+    }
+  }
+
+  unsigned int numPurpleAdded = 0;
+  if (numPurpleParticles > 0)
+  {
+    while (numPurpleAdded < numPurpleParticles)
+    {
+      // First, choose an x and y position at random from the (i) and (ii) bounds.
+      int x = randInt(-sideLen + 1, sideLen);
+      int y = randInt(1, 2 * sideLen);
+      Node purpleNode(x, y);
+
+      // If the node satisfies (iii) and is unoccupied, place a particle there.
+      if (0 < x + y && x + y < 2 * sideLen && occupied.find(purpleNode) == occupied.end())
+      {
+        insert(new CompressionParticle(purpleNode, -1, 0, *this, lambda, CompressionParticle::State::Purple));
+        // this->nodesOccupied++;
+        occupied.insert(purpleNode);
+        numPurpleAdded++;
       }
     }
   }

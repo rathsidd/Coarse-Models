@@ -93,10 +93,10 @@ void ParameterListModel::createSystem(QString algName) {
   } else if (signature == "compression") {
       dynamic_cast<CompressionAlg*>(alg)->
           //instantiate(params[0].toInt(), params[1].toInt(), params[2].toDouble());
-          instantiate(params[0].toInt(), params[1].toInt(), params[2].toInt(),
-          params[3].toDouble(), params[4].toDouble(), params[5].toDouble(),
-          params[6].toDouble(), params[7].toDouble(), params[8].toDouble(),
-          params[9].toInt(), params[10].toInt());
+          instantiate(params[0].toInt(), params[1].toInt(), params[2].toInt(), params[3].toInt(),
+          params[4].toDouble(), params[5].toDouble(), params[6].toDouble(),
+          params[7].toDouble(), params[8].toDouble(), params[9].toDouble(),
+          params[10].toInt(), params[11].toInt());
   } else if (signature == "energyshape") {
     dynamic_cast<EnergyShapeAlg*>(alg)->
         instantiate(params[0].toInt(), params[1].toInt(), params[2].toDouble(),
