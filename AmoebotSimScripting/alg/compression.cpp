@@ -61,8 +61,8 @@ void CompressionParticle::activate()
     q = randDouble(0, 1);
 
     //      //      //      FOR WT-GRBP5        //      //      //
-
- /*   if (!hasRBNbrInLine() && !stuckInRedLine())
+//    /*
+    if (!hasRBNbrInLine() && !stuckInRedLine())
     { //REMOVED && _state != State::Black &&
 
       if (_state == State::Red)
@@ -99,18 +99,18 @@ void CompressionParticle::activate()
         }
       }
     }
-    */
+//    */
     //  //  //      FOR WT-GRBP5-M2     //      //      //
-
+    /*
      if (!hasRBNbrInLine() && !stuckInRedLine()) { //REMOVED && _state != State::Black &&
 
-     if (_state == State::Red) {
+     if (_state == State::Blue) {
          if (q < 0.5) {
              _state = State::Red;
          } else { _state = State::Blue;
      }
      }
-     else if (_state == State::Blue) {
+     else if (_state == State::Red) {
          if (q < 0.33) {
              _state = State::Green;
          }
@@ -155,7 +155,7 @@ void CompressionParticle::activate()
          }
      }
    }
-
+   */
 
     if (stuckInRedLine() && _state == State::Red)
     {
@@ -303,6 +303,8 @@ void CompressionParticle::activate()
     } */
 
   if (system.getCount("# Activations")._value < 1000000000)
+  //FOR M2
+  /*
   {
       if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0) {
         int sideLen = static_cast<int>(50);
@@ -329,6 +331,9 @@ void CompressionParticle::activate()
                       //std::cout <<"blue" << std::endl;
                       system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Purple));
           }
+        }
+      }
+          */
           /*
           int typeOfParicles = 0;
           bool canInsertRed = false;
@@ -411,8 +416,33 @@ void CompressionParticle::activate()
         } // end of if 1 type
           //system.insert(new CompressionParticle(node, -1, randDir(), system, lambda, CompressionParticle::State::Red));
           //occupied.insert(node);
-      */}
+      }
     }
+      */
+      //FOR WT
+//      /*
+
+      {
+          if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0) {
+            int sideLen = static_cast<int>(50);
+            int x = randInt(-sideLen + 1, sideLen);
+            int y = randInt(1, 2 * sideLen);
+            Node node(x, y);
+            //std::set<Node> occupied;
+            // If the node satisfies (iii) and is unoccupied, place a particle there.
+            if (0 < x + y && x + y < 2 * sideLen && system.particleMap.find(node) == system.particleMap.end()) {
+              int randInteger = randInt(0, 100000);
+              //std::cout <<randInteger << std::endl;
+              if(randInteger < 99996) {
+                //std::cout <<"red" << std::endl;
+                system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
+              } else if (randInteger > 99996) {
+                //std::cout <<"blue" << std::endl;
+                system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
+              }
+            }
+          }
+//      */
  
     if (system.getCount("# Activations")._value % this->system.desorptionRate == 0)
     {
