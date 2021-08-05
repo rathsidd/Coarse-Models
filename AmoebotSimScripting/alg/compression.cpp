@@ -54,6 +54,11 @@ void CompressionParticle::activate()
   std::cout << "detachFromLine " << b << std::endl;
   std::cout << std::endl;
   */
+//  int newRound = 0;
+//  if (system.activatedParticles.size() == system.particles.size()) {
+//    newRound = 12345;
+//    system.activatedParticles.clear();
+//  }
 
   if (isContracted())
   {
@@ -61,7 +66,7 @@ void CompressionParticle::activate()
     q = randDouble(0, 1);
 
     //      //      //      FOR WT-GRBP5        //      //      //
-//    /*
+    /*
     if (!hasRBNbrInLine() && !stuckInRedLine())
     { //REMOVED && _state != State::Black &&
 
@@ -99,63 +104,51 @@ void CompressionParticle::activate()
         }
       }
     }
-//    */
+    */
     //  //  //      FOR WT-GRBP5-M2     //      //      //
-    /*
+//    /*
      if (!hasRBNbrInLine() && !stuckInRedLine()) { //REMOVED && _state != State::Black &&
 
-     if (_state == State::Blue) {
-         if (q < 0.5) {
-             _state = State::Red;
-         } else { _state = State::Blue;
-     }
-     }
-     else if (_state == State::Red) {
-         if (q < 0.33) {
-             _state = State::Green;
-         }
-         if (q > 0.333 && q < 0.666) {
+     if (_state == State::Red) {
+         if (q > 0.11335) {
              _state = State::Blue;
-         }
-         if (q > 0.666) {
-             _state = State::Red;
-         }
-
+         } else { _state = State::Red;
      }
-
-     else if (_state == State::Green) {
-         if (q < 0.33) {
+     }
+     else if (_state == State::Blue) {
+         if (q < 0.00044) {
              _state = State::Purple;
          }
-         if (q > 0.333 && q < 0.666) {
-             _state = State::Green;
+         if (q > 0.00044  && q < 0.1138) {
+             _state = State::Red;
          }
-         if (q > 0.666) {
+         if (q > 0.1138) {
              _state = State::Blue;
          }
 
      }
 
      else if (_state == State::Purple) {
-              if (q < 0.5) {
-                  _state = State::Purple;
-              } else { _state = State::Green;
-          }
-          }
+         if (q > 0.00044) {
+             _state = State::Blue;
+         }
+         if (q < 0.0044) {
+             _state = State::Purple;
+         }
+
+     }
 
      if (_state == State::Black && !hasRBNbrInLine() && !stuckInRedLine()) {
-         if (q < 0.25) {
-             _state = State::Red;
-         } if (q > 0.25 && q < 0.5) {
-             _state = State::Blue;
-         } if (q > 0.5 && q < 0.75) {
-             _state = State::Green;
-         } if (q > 0.75) {
+         if (q < 0.00044) {
              _state = State::Purple;
+         } if (q > 0.00044 && q < 0.1138) {
+             _state = State::Red;
+         } if (q > 0.1138) {
+             _state = State::Blue;
          }
      }
    }
-   */
+//   */
 
     if (stuckInRedLine() && _state == State::Red)
     {
@@ -304,7 +297,7 @@ void CompressionParticle::activate()
 
   if (system.getCount("# Activations")._value < 1000000000)
   //FOR M2
-  /*
+//  /*
   {
       if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0) {
         int sideLen = static_cast<int>(50);
@@ -316,24 +309,20 @@ void CompressionParticle::activate()
         if (0 < x + y && x + y < 2 * sideLen && system.particleMap.find(node) == system.particleMap.end()) {
           int randInteger = randInt(0, 100000);
           //std::cout <<randInteger << std::endl;
-          if(randInteger < 25000) {
+          if(randInteger < 4898) {
             //std::cout <<"red" << std::endl;
             system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Red));
-          } else if (randInteger > 25000 && randInteger < 50000) {
+          } else if (randInteger > 4898 && randInteger < 99977) {
             //std::cout <<"blue" << std::endl;
             system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Blue));
           }
-            else if (randInteger > 50000 && randInteger < 75000) {
-                      //std::cout <<"blue" << std::endl;
-                      system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Green));
-           }
-          else if (randInteger > 75000) {
+          else if (randInteger > 99977) {
                       //std::cout <<"blue" << std::endl;
                       system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Purple));
           }
         }
       }
-          */
+//          */
           /*
           int typeOfParicles = 0;
           bool canInsertRed = false;
@@ -420,7 +409,7 @@ void CompressionParticle::activate()
     }
       */
       //FOR WT
-//      /*
+      /*
 
       {
           if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0) {
@@ -442,7 +431,7 @@ void CompressionParticle::activate()
               }
             }
           }
-//      */
+      */
  
     if (system.getCount("# Activations")._value % this->system.desorptionRate == 0)
     {
