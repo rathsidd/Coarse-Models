@@ -80,6 +80,7 @@ protected:
   // Particle memory.
   const double lambda;
   double q;
+  int q2;
   int numNbrsBefore;
   int numRedNbrsBefore;
   int numBlueNbrsBefore;
