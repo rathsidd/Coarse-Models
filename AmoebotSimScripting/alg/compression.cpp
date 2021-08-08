@@ -26,6 +26,7 @@ CompressionParticle::CompressionParticle(const Node head,
     : AmoebotParticle(head, globalTailDir, orientation, system),
       lambda(lambda),
       q(0),
+      q2(0),
       numNbrsBefore(0),
       numRedNbrsBefore(0),
       numBlueNbrsBefore(0),
@@ -65,6 +66,7 @@ void CompressionParticle::activate()
   {
     int expandDir = randDir(); //Store a potential direction to expand into (for use later)
     q = randDouble(0, 1);
+    q2 = randInt(0, 10000000);
 
     //      //      //      FOR WT-GRBP5        //      //      //
     /*
@@ -156,7 +158,7 @@ void CompressionParticle::activate()
       _state = State::Black;
     }
 
-    if (hasRBNbrInLine() && !stuckInRedLine() && _state == State::Red && q < a)
+    if (hasRBNbrInLine() && !stuckInRedLine() && _state == State::Red && q2 < a)
     { //If it is in a line with another particle, decide if it will turn black or not.
       _state = State::Black;
     }
@@ -1975,8 +1977,9 @@ void CompressionSystem::insertPerRound() {
   int sideLen = static_cast<int>(50);
   unsigned int particlesAdded = 0;
 
+  //  //  //  // FOR WT  //  //  //  //
   // This will insert 10 particles per round
-  while (particlesAdded < 10)
+/*  while (particlesAdded < 10)
   {
     // First, choose an x and y position at random from the (i) and (ii) bounds.
     //std::cout << "lambda " <<lambda <<std::endl;
@@ -1992,4 +1995,36 @@ void CompressionSystem::insertPerRound() {
       particlesAdded++;
     }
   }
+  */
+
+  while (particlesAdded < 92)
+  {
+    // First, choose an x and y position at random from the (i) and (ii) bounds.
+    //std::cout << "lambda " <<lambda <<std::endl;
+    int x = randInt(-sideLen + 1, sideLen);
+    int y = randInt(1, 2 * sideLen);
+    Node node(x, y);
+    int randInteger9 = randInt(0, 10000);
+    // If the node satisfies (iii) and is unoccupied, place a particle there.
+    if (0 < x + y && x + y < 2 * sideLen && particleMap.find(node) == particleMap.end())
+    {
+        if (randInteger9 < 95080) {
+      insert(new CompressionParticle(node, -1, 0, *this, this->lambda , CompressionParticle::State::Blue));
+      //std::cout << "inserted" << std::endl;
+      particlesAdded++;
+    }
+        else if (randInteger9 > 95080 && randInteger9 < 99978) {
+      insert(new CompressionParticle(node, -1, 0, *this, this->lambda , CompressionParticle::State::Red));
+      //std::cout << "inserted" << std::endl;
+      particlesAdded++;
+    }
+        else if (randInteger9 > 99978) {
+      insert(new CompressionParticle(node, -1, 0, *this, this->lambda , CompressionParticle::State::Purple));
+      //std::cout << "inserted" << std::endl;
+      particlesAdded++;
+    }
+  }
 }
+}
+
+
