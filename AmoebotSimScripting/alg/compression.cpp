@@ -1967,6 +1967,7 @@ double MovesOverActivations::calculate() const
   //std::cout<< (double)_system.getCount("# Moves")._value/_system.getCount("# Activations")._value <<std::endl;
   // will insert a certain mumber of particles PER ROUND
   _system.insertPerRound();
+  _system.removePerRound();
   
   
   
@@ -2025,6 +2026,59 @@ void CompressionSystem::insertPerRound() {
     }
   }
 }
+}
+
+void CompressionSystem::removePerRound() {
+  unsigned int particlesRemoved = 0;
+  int i = 0;
+  // This will remove 5 particles per round
+  while (particlesRemoved < 5 && i < particles.size()) {
+    const auto &p = particles[i];
+    auto removeParticle = dynamic_cast<CompressionParticle *>(p);
+    bool removeNow = false;
+    int numNbrs = 0;
+    for (int j = 0; j < 6; j++)
+    {
+      if (removeParticle->hasNbrAtLabel(j))
+      {
+        numNbrs++;
+      }
+    }
+
+    if(removeParticle->_state == CompressionParticle::State::Black) {
+      continue;
+      i++;
+    }
+    else {
+      double randDoubleZeroToOne = rand() / (RAND_MAX + 1.0);
+      if(numNbrs == 0) {
+        removeNow = true;
+      }
+      else if (numNbrs == 1 && randDoubleZeroToOne < 0.8571) {
+        removeNow = true;
+      }
+      else if (numNbrs == 2 && randDoubleZeroToOne <  0.7143) {
+        removeNow = true;
+      }
+      else if (numNbrs == 3 && randDoubleZeroToOne < 0.5714) {
+        removeNow = true;
+      }
+      else if (numNbrs == 4 && randDoubleZeroToOne < 0.4285) {
+        removeNow = true;
+      }
+      else if (numNbrs == 5 && randDoubleZeroToOne < 0.2857) {
+        removeNow = true;
+      }
+      else if (numNbrs == 6 && randDoubleZeroToOne < 0.1429) {
+        removeNow = true;
+      }
+  }
+  if(removeNow) {
+    remove(removeParticle);
+    particlesRemoved++;
+    //std::cout << "removed" << std::endl;
+    }
+  }
 }
 
 

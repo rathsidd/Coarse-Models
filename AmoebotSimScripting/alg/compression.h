@@ -157,6 +157,7 @@ class CompressionSystem : public AmoebotSystem {
     std::vector<std::vector<CompressionParticle>> &heights, std::vector<std::vector<CompressionParticle>> &widths);
   std::vector<std::vector<CompressionParticle>> getClusters();
   void insertPerRound();
+  void removePerRound();
   //void getClusters();
   // Because this algorithm never terminates, this simply returns false.
   virtual bool hasTerminated() const;

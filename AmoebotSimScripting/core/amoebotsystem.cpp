@@ -101,7 +101,7 @@ void AmoebotSystem::remove(AmoebotParticle* particle) {
   }
   activatedParticles.erase(particle);
 
-  delete particle;
+  //delete particle;
 }
 
 void AmoebotSystem::registerMovement(unsigned int numMoves) {
