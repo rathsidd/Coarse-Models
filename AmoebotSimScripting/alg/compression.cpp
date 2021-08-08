@@ -13,6 +13,7 @@
 #include <list>
 #include <iterator>
 #include <unordered_set>
+#include <random>
 
 #include <QtGlobal>
 
@@ -1165,6 +1166,7 @@ CompressionSystem::CompressionSystem(unsigned int numRedParticles, unsigned int 
  double bindingAffinity, double seperationAffinity, double convertToStable,
  double detachFromLine, unsigned int adsorptionRate, unsigned int desorptionRate)
 {
+  this->lambda = lambda;
   this->removeBool = false;
   this->numRedParticles = numRedParticles;
   this->numBlueParticles = numBlueParticles;
@@ -1961,5 +1963,33 @@ MovesOverActivations::MovesOverActivations(const QString name,
 double MovesOverActivations::calculate() const
 {
   //std::cout<< (double)_system.getCount("# Moves")._value/_system.getCount("# Activations")._value <<std::endl;
+  // will insert a certain mumber of particles PER ROUND
+  _system.insertPerRound();
+  
+  
+  
   return (double)_system.getCount("# Moves")._value/_system.getCount("# Activations")._value;
+}
+
+void CompressionSystem::insertPerRound() {
+  int sideLen = static_cast<int>(50);
+  unsigned int particlesAdded = 0;
+
+  // This will insert 10 particles per round
+  while (particlesAdded < 10)
+  {
+    // First, choose an x and y position at random from the (i) and (ii) bounds.
+    //std::cout << "lambda " <<lambda <<std::endl;
+    int x = randInt(-sideLen + 1, sideLen);
+    int y = randInt(1, 2 * sideLen);
+    Node node(x, y);
+
+    // If the node satisfies (iii) and is unoccupied, place a particle there.
+    if (0 < x + y && x + y < 2 * sideLen && particleMap.find(node) == particleMap.end())
+    {
+      insert(new CompressionParticle(node, -1, 0, *this, this->lambda , CompressionParticle::State::Red));
+      //std::cout << "inserted" << std::endl;
+      particlesAdded++;
+    }
+  }
 }

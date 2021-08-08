@@ -46,6 +46,8 @@ class AmoebotSystem : public System, public RandomNumberGenerator {
   unsigned int adsorptionRate;
   unsigned int desorptionRate;
 
+  double lambda;
+
   // Deletes the particles, objects, and metrics in this system before
   // destructing the system.
   virtual ~AmoebotSystem();

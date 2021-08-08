@@ -155,6 +155,7 @@ class CompressionSystem : public AmoebotSystem {
   void DFSCluster(CompressionParticle &p, std::vector<CompressionParticle> &cluster,
     std::vector<std::vector<CompressionParticle>> &heights, std::vector<std::vector<CompressionParticle>> &widths);
   std::vector<std::vector<CompressionParticle>> getClusters();
+  void insertPerRound();
   //void getClusters();
   // Because this algorithm never terminates, this simply returns false.
   virtual bool hasTerminated() const;
