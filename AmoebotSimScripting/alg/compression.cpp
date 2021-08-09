@@ -69,7 +69,7 @@ void CompressionParticle::activate()
     q2 = randInt(0, 10000000);
 
     //      //      //      FOR WT-GRBP5        //      //      //
-    /*
+//    /*
     if (!hasRBNbrInLine() && !stuckInRedLine())
     { //REMOVED && _state != State::Black &&
 
@@ -107,9 +107,9 @@ void CompressionParticle::activate()
         }
       }
     }
-    */
+//    */
     //  //  //      FOR WT-GRBP5-M2     //      //      //
-//    /*
+    /*
      if (!hasRBNbrInLine() && !stuckInRedLine()) { //REMOVED && _state != State::Black &&
 
      if (_state == State::Red) {
@@ -151,7 +151,7 @@ void CompressionParticle::activate()
          }
      }
    }
-//   */
+   */
 
     if (stuckInRedLine() && _state == State::Red)
     {
@@ -1966,8 +1966,8 @@ double MovesOverActivations::calculate() const
 {
   //std::cout<< (double)_system.getCount("# Moves")._value/_system.getCount("# Activations")._value <<std::endl;
   // will insert a certain mumber of particles PER ROUND
-  //_system.insertPerRound();
-  _system.removePerRound();
+  _system.insertPerRound();
+  //_system.removePerRound();
   
   
   
@@ -1980,7 +1980,7 @@ void CompressionSystem::insertPerRound() {
 
   //  //  //  // FOR WT  //  //  //  //
   // This will insert 10 particles per round
-/*  while (particlesAdded < 10)
+  while (particlesAdded < 8)
   {
     // First, choose an x and y position at random from the (i) and (ii) bounds.
     //std::cout << "lambda " <<lambda <<std::endl;
@@ -1996,9 +1996,9 @@ void CompressionSystem::insertPerRound() {
       particlesAdded++;
     }
   }
-  */
 
-  while (particlesAdded < 92)
+
+/*  while (particlesAdded < 90)
   {
     // First, choose an x and y position at random from the (i) and (ii) bounds.
     //std::cout << "lambda " <<lambda <<std::endl;
@@ -2024,15 +2024,15 @@ void CompressionSystem::insertPerRound() {
       //std::cout << "inserted" << std::endl;
       particlesAdded++;
     }
-  }
-}
+  } else {particlesAdded++;}
+} */
 }
 
-void CompressionSystem::removePerRound() {
+/* void CompressionSystem::removePerRound() {
   unsigned int particlesRemoved = 0;
   int i = 0;
   // This will remove 5 particles per round
-  while (particlesRemoved < 5 && i < particles.size()) {
+  while (particlesRemoved < 1 && i < particles.size()) {
     const auto &p = particles[i];
     auto removeParticle = dynamic_cast<CompressionParticle *>(p);
     bool removeNow = false;
@@ -2049,6 +2049,7 @@ void CompressionSystem::removePerRound() {
       continue;
       i++;
     }
+
     else {
       double randDoubleZeroToOne = rand() / (RAND_MAX + 1.0);
       if(numNbrs == 0) {
@@ -2079,6 +2080,4 @@ void CompressionSystem::removePerRound() {
     //std::cout << "removed" << std::endl;
     }
   }
-}
-
-
+} */
