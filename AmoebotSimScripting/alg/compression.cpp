@@ -109,7 +109,7 @@ void CompressionParticle::activate()
     }
 //    */
     //  //  //      FOR WT-GRBP5-M2     //      //      //
-    /*
+   /*
      if (!hasRBNbrInLine() && !stuckInRedLine()) { //REMOVED && _state != State::Black &&
 
      if (_state == State::Red) {
@@ -1793,7 +1793,11 @@ void DFS(Graph const &graph, int v, vector<bool> &discovered)
 
 bool CompressionSystem::hasTerminated() const
 {
-  return particles.size() == 0;
+    if (getCount("# Rounds")._value == 600) {
+        return true;
+    }
+    else {return false;}
+  //return particles.size() == 0;
 }
 
 PerimeterMeasure::PerimeterMeasure(const QString name, const unsigned int freq,
@@ -1997,8 +2001,8 @@ void CompressionSystem::insertPerRound() {
     }
   }
 
-
-/*  while (particlesAdded < 90)
+/*
+  while (particlesAdded < 90)
   {
     // First, choose an x and y position at random from the (i) and (ii) bounds.
     //std::cout << "lambda " <<lambda <<std::endl;
