@@ -298,9 +298,9 @@ void CompressionParticle::activate()
           }
     } */
 
-  if (system.getCount("# Activations")._value < 1000000000)
+/*  if (system.getCount("# Activations")._value < 1000000000)
   //FOR M2
-//  /*
+
   {
       if (system.getCount("# Activations")._value % this->system.adsorptionRate == 0) {
         int sideLen = static_cast<int>(50);
@@ -324,7 +324,7 @@ void CompressionParticle::activate()
                       system.insert(new CompressionParticle(node, -1, 0, system, lambda, CompressionParticle::State::Purple));
           }
         }
-      }
+      } */
 //          */
           /*
           int typeOfParicles = 0;
@@ -436,7 +436,7 @@ void CompressionParticle::activate()
           }
       */
  
-    if (system.getCount("# Activations")._value % this->system.desorptionRate == 0)
+/*    if (system.getCount("# Activations")._value % this->system.desorptionRate == 0)
     {
       int numNbrs = 0;
       for (int j = 0; j < 6; j++)
@@ -473,12 +473,12 @@ void CompressionParticle::activate()
           removeNow = true;
         }
       }
-    }
-  }
+    } */
+//  }
   // system.getCount("Surface Coverage").record(round(system.size()/((3*sqrt(3) * pow(50, 2))/2)));
   //(system).getClusters();
   //system.remove(this);
-  if(removeNow) {
+/*  if(removeNow) {
     system.remove(this);
   }
   else {
@@ -486,7 +486,7 @@ void CompressionParticle::activate()
       system.removeBool = false;
       system.remove(this);
     }
-  }
+  } */
 }
 // end of activate
 
