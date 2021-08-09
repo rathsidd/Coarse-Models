@@ -1966,7 +1966,7 @@ double MovesOverActivations::calculate() const
 {
   //std::cout<< (double)_system.getCount("# Moves")._value/_system.getCount("# Activations")._value <<std::endl;
   // will insert a certain mumber of particles PER ROUND
-  _system.insertPerRound();
+  //_system.insertPerRound();
   _system.removePerRound();
   
   
